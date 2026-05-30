@@ -1,0 +1,50 @@
+<view class="page">
+  <view class="hero">
+    <text class="hero-title">好友房间</text>
+    <text class="hero-subtitle">把房间发到群里，每场比赛自动排名。</text>
+  </view>
+
+  <view class="room-list">
+    <view class="card room-card" wx:for="{{rooms}}" wx:key="id">
+      <view class="room-head">
+        <view>
+          <text class="room-name">{{item.name}}</text>
+          <text class="muted">{{item.type}} · {{item.members}} 人</text>
+        </view>
+        <text class="tag" wx:if="{{item.sponsor}}">赞助</text>
+      </view>
+
+      <view class="sponsor" wx:if="{{item.sponsor}}">
+        本房间由 {{item.sponsor}} 赞助
+      </view>
+
+      <view class="topic">
+        <text class="topic-label">群话题</text>
+        <text>{{item.topic}}</text>
+      </view>
+
+      <view class="heat">
+        <view class="heat-head">
+          <text>房间热度</text>
+          <text>{{item.heat}}%</text>
+        </view>
+        <view class="heat-track">
+          <view class="heat-fill" style="width: {{item.heat}}%;"></view>
+        </view>
+      </view>
+
+      <view class="rank-list">
+        <view class="{{player.id === 'me' ? 'rank-row me' : 'rank-row'}}" wx:for="{{item.players}}" wx:for-item="player" wx:for-index="index" wx:key="id">
+          <text class="rank-no">{{index + 1}}</text>
+          <text class="rank-name">{{player.name}}</text>
+          <text class="rank-score">{{player.score}} 分</text>
+        </view>
+      </view>
+
+      <view class="room-actions">
+        <button class="ghost-btn cheer-btn" bindtap="cheerRoom" data-id="{{item.id}}">助威 {{item.cheers}}</button>
+        <button class="primary-btn share-btn" open-type="share" data-room="{{item.name}}">邀请群友 PK</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="hero">
+    <text class="hero-title">世界杯预言家</text>
+    <text class="hero-subtitle">和朋友一起预测比分，看看谁能击败 AI。</text>
+    <view class="hero-stats">
+      <view>
+        <text class="stat-value">{{me.score}}</text>
+        <text class="stat-label">我的积分</text>
+      </view>
+      <view>
+        <text class="stat-value">{{me.aiWins}}</text>
+        <text class="stat-label">击败 AI</text>
+      </view>
+      <view>
+        <text class="stat-value">{{me.percentile}}%</text>
+        <text class="stat-label">超过玩家</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-title">今日比赛</view>
+  <view class="match-list">
+    <view class="card match-card" wx:for="{{matches}}" wx:key="id" bindtap="goPredict" data-id="{{item.id}}">
+      <view class="match-head">
+        <text class="tag">{{item.group}}</text>
+        <text class="muted">{{item.time}}</text>
+      </view>
+      <view class="teams">
+        <text>{{item.home}}</text>
+        <text class="versus">VS</text>
+        <text>{{item.away}}</text>
+      </view>
+      <view class="match-foot">
+        <text class="muted">AI：{{item.aiPick}} {{item.aiScore}}</text>
+        <text class="{{item.status === 'closed' ? 'status closed' : 'status'}}">{{item.statusText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-title">好友房间</view>
+  <view class="card room-preview" bindtap="goRoom">
+    <view>
+      <text class="room-name">{{topRoom.name}}</text>
+      <text class="muted">{{topRoom.members}} 人正在竞猜</text>
+    </view>
+    <text class="rank-badge">第 {{myRoomRank}} 名</text>
+  </view>
+</view>

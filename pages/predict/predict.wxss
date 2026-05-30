@@ -1,0 +1,149 @@
+.match-panel {
+  padding: 28rpx;
+}
+
+.time {
+  display: block;
+  margin-top: 18rpx;
+  color: #68717d;
+}
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 80rpx 1fr;
+  align-items: center;
+  margin: 30rpx 0 16rpx;
+  font-size: 38rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.versus {
+  color: #8a949f;
+  font-size: 22rpx;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+}
+
+.seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78rpx;
+  border: 2rpx solid #d8dee5;
+  border-radius: 8rpx;
+  background: #ffffff;
+  color: #17212b;
+  font-weight: 800;
+}
+
+.seg.active {
+  border-color: #0b7a75;
+  background: #e8f4f3;
+  color: #0b7a75;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr 42rpx 1fr;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.score-input,
+.text-input {
+  height: 88rpx;
+  border: 2rpx solid #d8dee5;
+  border-radius: 8rpx;
+  background: #ffffff;
+  color: #17212b;
+  font-size: 30rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.score-colon {
+  color: #68717d;
+  font-size: 34rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.text-input {
+  padding: 0 24rpx;
+  text-align: left;
+  font-weight: 600;
+}
+
+.confidence-card {
+  padding: 18rpx 22rpx;
+  border-radius: 8rpx;
+  background: #ffffff;
+}
+
+.confidence-card text {
+  display: block;
+  margin-bottom: 4rpx;
+  color: #0b7a75;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.submit {
+  margin-top: 38rpx;
+}
+
+.share {
+  margin-top: 16rpx;
+}
+
+.ai-card {
+  margin-top: 24rpx;
+  padding: 26rpx;
+}
+
+.fun-card {
+  margin-top: 24rpx;
+  padding: 26rpx;
+  background: #fff8ea;
+}
+
+.fun-title,
+.fun-line {
+  display: block;
+}
+
+.fun-title {
+  color: #7a4b00;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.fun-line {
+  margin: 12rpx 0 8rpx;
+  color: #17212b;
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.ai-title,
+.ai-score {
+  display: block;
+}
+
+.ai-title {
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.ai-score {
+  margin: 14rpx 0 8rpx;
+  color: #0b7a75;
+  font-size: 34rpx;
+  font-weight: 800;
+}

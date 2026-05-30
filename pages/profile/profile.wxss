@@ -1,0 +1,81 @@
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38rpx 28rpx;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 999rpx;
+  background: #17212b;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 900;
+}
+
+.name {
+  margin: 18rpx 0 8rpx;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.title-badge {
+  margin-bottom: 10rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #e8f4f3;
+  color: #0b7a75;
+  font-size: 22rpx;
+  font-weight: 900;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.stat {
+  padding: 24rpx 12rpx;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  margin-bottom: 8rpx;
+  color: #0b7a75;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 88rpx;
+  margin-bottom: 16rpx;
+  padding: 0 24rpx;
+  font-weight: 800;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.badge {
+  padding: 12rpx 18rpx;
+  border-radius: 8rpx;
+  background: #17212b;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 800;
+}

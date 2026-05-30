@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="tabs">
+    <view class="{{activeTab === item.key ? 'tab active' : 'tab'}}" wx:for="{{tabs}}" wx:key="key" bindtap="switchTab" data-key="{{item.key}}">
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="card rank-summary">
+    <text class="summary-value">你已超过 {{me.percentile}}% 的玩家</text>
+    <text class="muted">继续预测下一场，排名会实时变化。</text>
+  </view>
+
+  <view class="card leaderboard">
+    <view class="rank-row head">
+      <text>排名</text>
+      <text>玩家</text>
+      <text>积分</text>
+    </view>
+    <view class="{{item.id === 'me' ? 'rank-row me' : 'rank-row'}}" wx:for="{{players}}" wx:key="id">
+      <text>{{index + 1}}</text>
+      <text>{{item.name}}</text>
+      <text>{{item.score}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,126 @@
+.room-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-top: 28rpx;
+}
+
+.room-card {
+  padding: 26rpx;
+}
+
+.room-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.room-name {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.sponsor {
+  margin-top: 20rpx;
+  padding: 18rpx;
+  border-radius: 8rpx;
+  background: #fff4df;
+  color: #7a4b00;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.topic {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border-radius: 8rpx;
+  background: #f4f6f8;
+  color: #17212b;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.topic-label {
+  flex: 0 0 auto;
+  color: #0b7a75;
+  font-weight: 900;
+}
+
+.heat {
+  margin-top: 20rpx;
+}
+
+.heat-head {
+  display: flex;
+  justify-content: space-between;
+  color: #68717d;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.heat-track {
+  height: 14rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #e6ebef;
+}
+
+.heat-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: #0b7a75;
+}
+
+.rank-list {
+  margin-top: 22rpx;
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 52rpx 1fr 130rpx;
+  align-items: center;
+  min-height: 64rpx;
+  border-top: 2rpx solid #eef1f4;
+}
+
+.rank-row:first-child {
+  border-top: none;
+}
+
+.rank-row.me {
+  color: #0b7a75;
+  font-weight: 800;
+}
+
+.rank-no {
+  color: #8a949f;
+  font-weight: 800;
+}
+
+.rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-score {
+  text-align: right;
+  font-weight: 800;
+}
+
+.room-actions {
+  display: grid;
+  grid-template-columns: 190rpx 1fr;
+  gap: 14rpx;
+  margin-top: 24rpx;
+}
+
+.cheer-btn,
+.share-btn {
+  height: 78rpx;
+}

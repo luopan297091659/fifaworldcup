@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/predict/predict",
+    "pages/room/room",
+    "pages/ranking/ranking",
+    "pages/result/result",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarTitleText": "世界杯预言家",
+    "navigationBarBackgroundColor": "#101820",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f7f9"
+  },
+  "tabBar": {
+    "color": "#68717d",
+    "selectedColor": "#0b7a75",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "比赛"
+      },
+      {
+        "pagePath": "pages/room/room",
+        "text": "房间"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "text": "榜单"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

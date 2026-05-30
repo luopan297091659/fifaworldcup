@@ -1,0 +1,26 @@
+.score-card {
+  margin: 28rpx 0;
+  padding: 32rpx;
+  text-align: center;
+}
+
+.label,
+.earned,
+.score-card .muted {
+  display: block;
+}
+
+.label {
+  color: #68717d;
+}
+
+.earned {
+  margin: 12rpx 0 18rpx;
+  color: #0b7a75;
+  font-size: 60rpx;
+  font-weight: 900;
+}
+
+.score-card .muted {
+  margin-top: 10rpx;
+}

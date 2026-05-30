@@ -1,0 +1,95 @@
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-top: 32rpx;
+}
+
+.hero-stats view {
+  padding: 18rpx 16rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.stat-value,
+.stat-label {
+  display: block;
+}
+
+.stat-value {
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 22rpx;
+}
+
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.match-card {
+  padding: 26rpx;
+}
+
+.match-head,
+.match-foot,
+.room-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 80rpx 1fr;
+  align-items: center;
+  margin: 28rpx 0;
+  font-size: 36rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.versus {
+  color: #8a949f;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.status {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.status.closed {
+  color: #b64128;
+}
+
+.room-preview {
+  padding: 26rpx;
+}
+
+.room-name {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.rank-badge {
+  min-width: 110rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+  background: #17212b;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 800;
+  text-align: center;
+}

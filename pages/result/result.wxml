@@ -1,0 +1,15 @@
+<view class="page" wx:if="{{match && prediction}}">
+  <view class="hero">
+    <text class="hero-title">{{resultTitle}}</text>
+    <text class="hero-subtitle">{{match.home}} {{match.finalScore}} {{match.away}}</text>
+  </view>
+
+  <view class="card score-card">
+    <text class="label">本场获得</text>
+    <text class="earned">{{prediction.earned}} 分</text>
+    <text class="muted">你的预测：{{prediction.result}} {{prediction.score}}</text>
+    <text class="muted">AI 预测：{{match.aiPick}} {{match.aiScore}}</text>
+  </view>
+
+  <button class="primary-btn" open-type="share">分享战绩</button>
+</view>

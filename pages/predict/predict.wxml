@@ -1,0 +1,57 @@
+<view class="page" wx:if="{{match}}">
+  <view class="card match-panel">
+    <text class="tag">{{match.group}}</text>
+    <text class="time">{{match.time}}</text>
+    <view class="teams">
+      <text>{{match.home}}</text>
+      <text class="versus">VS</text>
+      <text>{{match.away}}</text>
+    </view>
+    <text class="muted">提交后显示 AI 预测，防止大家抄作业。</text>
+  </view>
+
+  <view class="section-title">胜平负</view>
+  <view class="segmented">
+    <view class="{{form.result === item ? 'seg active' : 'seg'}}" wx:for="{{resultOptions}}" wx:key="*this" bindtap="selectResult" data-value="{{item}}">
+      {{item}}
+    </view>
+  </view>
+
+  <view class="section-title">比分</view>
+  <view class="score-row">
+    <input class="score-input" type="number" value="{{form.homeGoals}}" bindinput="setHomeGoals" maxlength="2" />
+    <text class="score-colon">:</text>
+    <input class="score-input" type="number" value="{{form.awayGoals}}" bindinput="setAwayGoals" maxlength="2" />
+  </view>
+
+  <view class="section-title">总进球数</view>
+  <view class="segmented">
+    <view class="{{form.totalGoals === item ? 'seg active' : 'seg'}}" wx:for="{{goalOptions}}" wx:key="*this" bindtap="selectGoals" data-value="{{item}}">
+      {{item}}
+    </view>
+  </view>
+
+  <view class="section-title">首个进球球员</view>
+  <input class="text-input" placeholder="例如：三笘薰" value="{{form.firstScorer}}" bindinput="setFirstScorer" />
+
+  <view class="section-title">信心值</view>
+  <view class="confidence-card">
+    <text>{{form.confidence}}%</text>
+    <slider min="1" max="100" step="1" value="{{form.confidence}}" activeColor="#0b7a75" backgroundColor="#d8dee5" bindchange="setConfidence" />
+  </view>
+
+  <button class="primary-btn submit" bindtap="submitPrediction">提交预测</button>
+  <button class="ghost-btn share" wx:if="{{prediction}}" open-type="share">发到群里 PK</button>
+
+  <view class="card fun-card" wx:if="{{funCard}}">
+    <text class="fun-title">{{funCard.title}}</text>
+    <text class="fun-line">{{funCard.shareLine}}</text>
+    <text class="muted">{{funCard.roast}}</text>
+  </view>
+
+  <view class="card ai-card" wx:if="{{prediction}}">
+    <text class="ai-title">AI 预言家</text>
+    <text class="ai-score">AI 预测：{{match.aiPick}} {{match.aiScore}}</text>
+    <text class="muted">{{match.oddsText}}</text>
+  </view>
+</view>

@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="card profile-card">
+    <text class="avatar">我</text>
+    <text class="name">{{me.name}}</text>
+    <text class="title-badge">{{me.title}}</text>
+    <text class="muted">预测 {{me.predictions}} 场 · 击败 AI {{me.aiWins}} 次</text>
+  </view>
+
+  <view class="stats">
+    <view class="card stat">
+      <text class="stat-value">{{me.score}}</text>
+      <text class="muted">总积分</text>
+    </view>
+    <view class="card stat">
+      <text class="stat-value">{{aiStats.userWinRate}}%</text>
+      <text class="muted">用户胜率</text>
+    </view>
+    <view class="card stat">
+      <text class="stat-value">{{aiStats.aiWinRate}}%</text>
+      <text class="muted">AI 胜率</text>
+    </view>
+  </view>
+
+  <view class="section-title">商业化入口</view>
+  <view class="badges">
+    <view class="badge" wx:for="{{me.badges}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="card action-row">
+    <text>查看 AI 深度预测</text>
+    <text class="muted">激励视频</text>
+  </view>
+  <view class="card action-row">
+    <text>创建赞助房间</text>
+    <text class="muted">品牌合作</text>
+  </view>
+</view>
