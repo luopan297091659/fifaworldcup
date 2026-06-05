@@ -1,15 +1,28 @@
-<view class="page" wx:if="{{match && prediction}}">
-  <view class="hero">
+<view class="page" wx:if="{{match}}">
+  <view class="hero" wx:if="{{prediction}}">
     <text class="hero-title">{{resultTitle}}</text>
-    <text class="hero-subtitle">{{match.home}} {{match.finalScore}} {{match.away}}</text>
+    <text class="hero-subtitle" wx:if="{{match.finalScore}}">{{match.home}} {{match.finalScore}} {{match.away}}</text>
+    <text class="hero-subtitle" wx:else>{{match.home}} VS {{match.away}}</text>
   </view>
 
-  <view class="card score-card">
+  <view class="card score-card" wx:if="{{prediction}}">
     <text class="label">本场获得</text>
     <text class="earned">{{prediction.earned}} 分</text>
     <text class="muted">你的预测：{{prediction.result}} {{prediction.score}}</text>
-    <text class="muted">AI 预测：{{match.aiPick}} {{match.aiScore}}</text>
+    <text class="muted">AI 看法：{{match.aiPick}} {{match.aiScore}}</text>
   </view>
 
-  <button class="primary-btn" open-type="share">分享战绩</button>
+  <view class="card score-card" wx:else>
+    <text class="label">暂无你的预测</text>
+    <text class="earned">{{match.home}} VS {{match.away}}</text>
+    <text class="muted">比赛结果公布后，会在这里展示赛果和 AI 参考。</text>
+  </view>
+
+  <view class="card review-card" wx:if="{{review}}">
+    <text class="review-title">{{review.title}}</text>
+    <text class="review-line">{{review.line}}</text>
+    <text class="review-ai">{{review.aiText}}</text>
+  </view>
+
+  <button class="primary-btn" open-type="share" wx:if="{{prediction}}">分享记录</button>
 </view>

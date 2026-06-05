@@ -1,9 +1,24 @@
 <view class="page">
   <view class="card profile-card">
-    <text class="avatar">我</text>
+    <image wx:if="{{me.avatarUrl}}" class="avatar-img" src="{{me.avatarUrl}}" mode="aspectFill"></image>
+    <text wx:else class="avatar">我</text>
     <text class="name">{{me.name}}</text>
     <text class="title-badge">{{me.title}}</text>
-    <text class="muted">预测 {{me.predictions}} 场 · 击败 AI {{me.aiWins}} 次</text>
+    <text class="muted">预测 {{me.predictions}} 场 · AI 对照 {{me.aiWins}} 次</text>
+  </view>
+
+  <view wx:if="{{!isLoggedIn}}" class="card login-card">
+    <view>
+      <text class="login-title">微信登录</text>
+      <text class="login-desc">登录后可同步昵称头像，并为正式服务端保存预测记录。</text>
+    </view>
+    <button class="primary-btn login-btn" loading="{{loginLoading}}" bindtap="handleWechatLogin">
+      {{loginLoading ? "登录中" : "微信一键登录"}}
+    </button>
+  </view>
+  <view wx:else class="card action-row">
+    <text>已登录微信账号</text>
+    <button class="link-btn" bindtap="handleLogout">退出</button>
   </view>
 
   <view class="stats">
@@ -21,17 +36,13 @@
     </view>
   </view>
 
-  <view class="section-title">商业化入口</view>
+  <view class="section-title">我的徽章</view>
   <view class="badges">
     <view class="badge" wx:for="{{me.badges}}" wx:key="*this">{{item}}</view>
   </view>
 
   <view class="card action-row">
-    <text>查看 AI 深度预测</text>
-    <text class="muted">激励视频</text>
-  </view>
-  <view class="card action-row">
-    <text>创建赞助房间</text>
-    <text class="muted">品牌合作</text>
+    <text>预测记录仅作娱乐展示</text>
+    <text class="muted">无兑换功能</text>
   </view>
 </view>

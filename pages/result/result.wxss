@@ -24,3 +24,36 @@
 .score-card .muted {
   margin-top: 10rpx;
 }
+
+.review-card {
+  margin: 0 0 28rpx;
+  padding: 28rpx;
+  background: #fff8ea;
+}
+
+.review-title,
+.review-line,
+.review-ai {
+  display: block;
+}
+
+.review-title {
+  color: #7a4b00;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.review-line {
+  margin-top: 12rpx;
+  color: #17212b;
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.review-ai {
+  margin-top: 10rpx;
+  color: #68717d;
+  font-size: 25rpx;
+  line-height: 1.45;
+}

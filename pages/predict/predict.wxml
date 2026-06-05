@@ -7,10 +7,10 @@
       <text class="versus">VS</text>
       <text>{{match.away}}</text>
     </view>
-    <text class="muted">提交后显示 AI 预测，防止大家抄作业。</text>
+    <text class="muted">提交后显示 AI 参考，防止大家抄作业。</text>
   </view>
 
-  <view class="section-title">胜平负</view>
+  <view class="section-title">赛果选择</view>
   <view class="segmented">
     <view class="{{form.result === item ? 'seg active' : 'seg'}}" wx:for="{{resultOptions}}" wx:key="*this" bindtap="selectResult" data-value="{{item}}">
       {{item}}
@@ -32,6 +32,31 @@
   </view>
 
   <view class="section-title">首个进球球员</view>
+  <view class="card lineup-card">
+    <view class="lineup-head">
+      <view>
+        <text class="lineup-title">首发阵容</text>
+        <text class="lineup-status">{{lineupStatusText}}</text>
+      </view>
+      <button class="lineup-refresh" bindtap="refreshLineups">同步</button>
+    </view>
+
+    <view class="lineup-list" wx:if="{{lineupPlayers.length}}">
+      <view
+        class="{{form.firstScorer === player.name ? 'player-chip active' : 'player-chip'}}"
+        wx:for="{{lineupPlayers}}"
+        wx:for-item="player"
+        wx:key="id"
+        bindtap="selectFirstScorer"
+        data-name="{{player.name}}"
+      >
+        <text class="player-name">{{player.name}}</text>
+        <text class="player-meta">{{player.team}} · {{player.position}}</text>
+      </view>
+    </view>
+
+    <text class="lineup-empty" wx:else>暂未拿到首发名单，可以先手动填写。</text>
+  </view>
   <input class="text-input" placeholder="例如：三笘薰" value="{{form.firstScorer}}" bindinput="setFirstScorer" />
 
   <view class="section-title">信心值</view>
@@ -41,17 +66,20 @@
   </view>
 
   <button class="primary-btn submit" bindtap="submitPrediction">提交预测</button>
-  <button class="ghost-btn share" wx:if="{{prediction}}" open-type="share">发到群里 PK</button>
+  <button class="ghost-btn share" wx:if="{{prediction}}" open-type="share">发到群里交流</button>
 
   <view class="card fun-card" wx:if="{{funCard}}">
     <text class="fun-title">{{funCard.title}}</text>
     <text class="fun-line">{{funCard.shareLine}}</text>
+    <view class="fun-tags">
+      <text class="fun-tag" wx:for="{{funCard.tags}}" wx:key="*this">{{item}}</text>
+    </view>
     <text class="muted">{{funCard.roast}}</text>
   </view>
 
   <view class="card ai-card" wx:if="{{prediction}}">
-    <text class="ai-title">AI 预言家</text>
-    <text class="ai-score">AI 预测：{{match.aiPick}} {{match.aiScore}}</text>
-    <text class="muted">{{match.oddsText}}</text>
+    <text class="ai-title">AI 参考</text>
+    <text class="ai-score">AI 看法：{{match.aiPick}} {{match.aiScore}}</text>
+    <text class="muted">{{match.aiNote}}</text>
   </view>
 </view>

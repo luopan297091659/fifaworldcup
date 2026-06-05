@@ -1,7 +1,7 @@
 <view class="page">
   <view class="hero">
-    <text class="hero-title">好友房间</text>
-    <text class="hero-subtitle">把房间发到群里，每场比赛自动排名。</text>
+    <text class="hero-title">好友小组</text>
+    <text class="hero-subtitle">把小组发到群里，每场比赛一起记录预测。</text>
   </view>
 
   <view class="room-list">
@@ -11,11 +11,6 @@
           <text class="room-name">{{item.name}}</text>
           <text class="muted">{{item.type}} · {{item.members}} 人</text>
         </view>
-        <text class="tag" wx:if="{{item.sponsor}}">赞助</text>
-      </view>
-
-      <view class="sponsor" wx:if="{{item.sponsor}}">
-        本房间由 {{item.sponsor}} 赞助
       </view>
 
       <view class="topic">
@@ -33,6 +28,14 @@
         </view>
       </view>
 
+      <view class="highlight-grid">
+        <view class="highlight-item" wx:for="{{item.highlights}}" wx:for-item="highlight" wx:key="title">
+          <text class="highlight-title">{{highlight.title}}</text>
+          <text class="highlight-value">{{highlight.value}}</text>
+          <text class="highlight-note">{{highlight.note}}</text>
+        </view>
+      </view>
+
       <view class="rank-list">
         <view class="{{player.id === 'me' ? 'rank-row me' : 'rank-row'}}" wx:for="{{item.players}}" wx:for-item="player" wx:for-index="index" wx:key="id">
           <text class="rank-no">{{index + 1}}</text>
@@ -43,7 +46,7 @@
 
       <view class="room-actions">
         <button class="ghost-btn cheer-btn" bindtap="cheerRoom" data-id="{{item.id}}">助威 {{item.cheers}}</button>
-        <button class="primary-btn share-btn" open-type="share" data-room="{{item.name}}">邀请群友 PK</button>
+        <button class="primary-btn share-btn" open-type="share" data-room="{{item.name}}">邀请群友一起看</button>
       </view>
     </view>
   </view>

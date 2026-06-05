@@ -18,6 +18,13 @@
   font-weight: 900;
 }
 
+.avatar-img {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 999rpx;
+  background: #eef2f5;
+}
+
 .name {
   margin: 18rpx 0 8rpx;
   font-size: 34rpx;
@@ -61,6 +68,45 @@
   min-height: 88rpx;
   margin-bottom: 16rpx;
   padding: 0 24rpx;
+  font-weight: 800;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: 22rpx;
+  margin-top: 24rpx;
+  padding: 26rpx;
+}
+
+.login-title {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.login-desc {
+  display: block;
+  color: #68717d;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+
+.login-btn {
+  width: 100%;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96rpx;
+  height: 58rpx;
+  padding: 0 18rpx;
+  background: #ffffff;
+  color: #0b7a75;
+  font-size: 25rpx;
   font-weight: 800;
 }
 

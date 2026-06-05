@@ -8,7 +8,7 @@
     "pages/profile/profile"
   ],
   "window": {
-    "navigationBarTitleText": "世界杯预言家",
+    "navigationBarTitleText": "球见未来",
     "navigationBarBackgroundColor": "#101820",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f6f7f9"

@@ -1,45 +1,61 @@
-const { getMatch } = require("../../utils/mockData");
+const api = require("../../utils/api");
+const { buildResultReview } = require("../../utils/fun");
 
 Page({
   data: {
     match: null,
     prediction: null,
-    resultTitle: ""
+    resultTitle: "",
+    review: null
   },
 
   onLoad(query) {
-    const state = getApp().globalData.state;
-    const match = getMatch(state, query.id || "m3");
-    const prediction = state.predictions[match.id];
-    
-    let resultTitle = "";
+    api.getMatchDetail(query.id || "m3")
+      .then(({ match, prediction }) => {
+        if (!match) {
+          wx.showToast({ title: "比赛不存在", icon: "none" });
+          setTimeout(() => wx.navigateBack(), 1500);
+          return;
+        }
+
+        this.setData({
+          match,
+          prediction,
+          resultTitle: this.getResultTitle(match, prediction),
+          review: buildResultReview(match, prediction)
+        });
+      })
+      .catch((error) => {
+        console.error("结果页加载错误:", error);
+        wx.showToast({ title: "比赛不存在", icon: "none" });
+        setTimeout(() => wx.navigateBack(), 1500);
+      });
+  },
+
+  getResultTitle(match, prediction) {
     if (!match.finalScore) {
-      resultTitle = "比赛尚未开奖";
-    } else {
-      const aiHit = match.aiScore === match.finalScore;
-      const predictionHit = prediction && prediction.score === match.finalScore;
-      
-      if (predictionHit && aiHit) {
-        resultTitle = "你和 AI 都预测正确了";
-      } else if (predictionHit) {
-        resultTitle = "你击败了 AI";
-      } else if (aiHit) {
-        resultTitle = "AI 本场预测正确";
-      } else {
-        resultTitle = "这场大家都没预测对";
-      }
+      return "比赛结果尚未公布";
     }
 
-    this.setData({
-      match,
-      prediction,
-      resultTitle
-    });
+    const aiHit = match.aiScore === match.finalScore;
+    const predictionHit = prediction && prediction.score === match.finalScore;
+
+    if (predictionHit && aiHit) {
+      return "你和 AI 都预测正确了";
+    }
+    if (predictionHit) {
+      return "你的预测更接近";
+    }
+    if (aiHit) {
+      return "AI 本场预测正确";
+    }
+    return "这场大家都没预测对";
   },
 
   onShareAppMessage() {
+    const { prediction, review } = this.data;
     return {
-      title: `我本场拿到 ${this.data.prediction.earned} 分，来挑战 AI`,
+      title: review ? review.shareLine : prediction ? `我本场拿到 ${prediction.earned} 分，一起看球` : "一起看球，记录赛果预测",
       path: "/pages/home/home"
     };
   }

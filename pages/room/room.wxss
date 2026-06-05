@@ -76,6 +76,52 @@
   background: #0b7a75;
 }
 
+.highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 22rpx;
+}
+
+.highlight-item {
+  min-width: 0;
+  padding: 16rpx 12rpx;
+  border: 2rpx solid #eef1f4;
+  border-radius: 8rpx;
+  background: #fbfcfd;
+}
+
+.highlight-title,
+.highlight-value,
+.highlight-note {
+  display: block;
+}
+
+.highlight-title {
+  color: #68717d;
+  font-size: 21rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.highlight-value {
+  margin-top: 8rpx;
+  overflow: hidden;
+  color: #17212b;
+  font-size: 27rpx;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.highlight-note {
+  margin-top: 6rpx;
+  color: #8a949f;
+  font-size: 20rpx;
+  line-height: 1.3;
+}
+
 .rank-list {
   margin-top: 22rpx;
 }

@@ -1,3 +1,5 @@
+const api = require("../../utils/api");
+
 Page({
   data: {
     me: {},
@@ -7,34 +9,43 @@ Page({
   },
 
   onShow() {
-    try {
-      const app = getApp();
-      const state = app.globalData.state;
-      
-      if (!state || !state.me || !state.rooms || !state.matches) {
-        wx.showToast({ title: "数据不可用", icon: "none" });
-        return;
-      }
-      
-      const topRoom = state.rooms[0];
-      const rankIndex = topRoom && topRoom.players 
-        ? topRoom.players.findIndex((player) => player.id === state.me.id)
-        : -1;
-      const myRoomRank = rankIndex >= 0 ? rankIndex + 1 : 0;
+    api.getHome()
+      .then((homeData) => {
+        if (!homeData || !homeData.me || !homeData.rooms || !homeData.matches) {
+          wx.showToast({ title: "数据不可用", icon: "none" });
+          return;
+        }
 
-      this.setData({
-        me: state.me,
-        matches: state.matches.map((match) => ({
-          ...match,
-          statusText: match.status === "closed" ? "已开奖" : state.predictions[match.id] ? "已预测" : "去预测"
-        })),
-        topRoom: topRoom || {},
-        myRoomRank
+        const predictions = homeData.predictions || {};
+        const topRoom = homeData.topRoom || homeData.rooms[0];
+        const myRoomRank = typeof homeData.myRoomRank === "number"
+          ? homeData.myRoomRank
+          : this.getMyRoomRank(topRoom, homeData.me.id);
+
+        this.setData({
+          me: homeData.me,
+          matches: homeData.matches.map((match) => ({
+            ...match,
+            statusText: match.status === "closed" ? "已公布" : predictions[match.id] ? "已预测" : "去预测",
+            aiSummary: predictions[match.id] || match.status === "closed"
+              ? `AI：${match.aiPick} ${match.aiScore}`
+              : "提交后显示 AI 参考"
+          })),
+          topRoom: topRoom || {},
+          myRoomRank
+        });
+      })
+      .catch((error) => {
+        console.error("首页加载错误:", error);
+        wx.showToast({ title: "数据不可用", icon: "none" });
       });
-    } catch (error) {
-      console.error("首页加载错误:", error);
-      wx.showToast({ title: "加载失败", icon: "none" });
-    }
+  },
+
+  getMyRoomRank(room, userId) {
+    const rankIndex = room && room.players
+      ? room.players.findIndex((player) => player.id === userId)
+      : -1;
+    return rankIndex >= 0 ? rankIndex + 1 : 0;
   },
 
   goPredict(event) {
@@ -45,29 +56,23 @@ Page({
       return;
     }
     
-    try {
-      const state = getApp().globalData.state;
-      const match = state.matches.find((item) => item.id === id);
+    api.getMatchDetail(id)
+      .then(({ match }) => {
+        if (!match) {
+          wx.showToast({ title: "比赛不存在", icon: "none" });
+          return;
+        }
 
-      if (!match) {
-        wx.showToast({ title: "比赛不存在", icon: "none" });
-        return;
-      }
-      
-      if (match.status === "closed") {
         wx.navigateTo({
-          url: `/pages/result/result?id=${id}`
+          url: match.status === "closed"
+            ? `/pages/result/result?id=${id}`
+            : `/pages/predict/predict?id=${id}`
         });
-        return;
-      }
-
-      wx.navigateTo({
-        url: `/pages/predict/predict?id=${id}`
+      })
+      .catch((error) => {
+        console.error("导航错误:", error);
+        wx.showToast({ title: "导航失败", icon: "none" });
       });
-    } catch (error) {
-      console.error("导航错误:", error);
-      wx.showToast({ title: "导航失败", icon: "none" });
-    }
   },
 
   goRoom() {
