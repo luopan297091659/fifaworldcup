@@ -8,7 +8,10 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "smoke": "node test/smoke.js",
-    "db:init": "node scripts/init-db.js"
+    "contract": "node test/contract.js",
+    "verify": "npm run smoke && npm run contract",
+    "db:init": "node scripts/init-db.js",
+    "db:migrate-file": "node scripts/migrate-file-to-mysql.js"
   },
   "dependencies": {
     "express": "^4.19.2",

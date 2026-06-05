@@ -74,7 +74,7 @@ async function ensureMysqlStore() {
 
   const [rows] = await pool.execute("SELECT id FROM worldcup_app_state WHERE id = ?", ["main"]);
   if (!rows.length) {
-    await pool.execute("INSERT INTO worldcup_app_state (id, data) VALUES (?, CAST(? AS JSON))", [
+    await pool.execute("INSERT INTO worldcup_app_state (id, data) VALUES (?, ?)", [
       "main",
       JSON.stringify(cloneSeed())
     ]);
@@ -98,7 +98,7 @@ async function updateMysqlStore(mutator) {
       ? (typeof rows[0].data === "string" ? JSON.parse(rows[0].data) : rows[0].data)
       : cloneSeed();
     const result = mutator(data);
-    await connection.execute("REPLACE INTO worldcup_app_state (id, data) VALUES (?, CAST(? AS JSON))", [
+    await connection.execute("REPLACE INTO worldcup_app_state (id, data) VALUES (?, ?)", [
       "main",
       JSON.stringify(data)
     ]);
@@ -119,7 +119,7 @@ async function readStore() {
 async function writeStore(data) {
   if (useMysql()) {
     const pool = await getMysqlPool();
-    await pool.execute("REPLACE INTO worldcup_app_state (id, data) VALUES (?, CAST(? AS JSON))", [
+    await pool.execute("REPLACE INTO worldcup_app_state (id, data) VALUES (?, ?)", [
       "main",
       JSON.stringify(data)
     ]);

@@ -1,6 +1,5 @@
 const { badRequest } = require("./errors");
 
-const RESULT_OPTIONS = new Set(["主胜", "平", "客胜"]);
 const GOAL_OPTIONS = new Set(["0-1", "2-3", "4+"]);
 const SCORER_SOURCES = new Set(["manual", "lineup"]);
 
@@ -10,7 +9,9 @@ function asString(value, fallback = "") {
 
 function validateAppKey(req, res, next) {
   const expected = process.env.APP_KEY || "worldcup";
-  const actual = req.headers["x-app-key"] || req.body.appKey || req.query.appKey;
+  const body = req.body || {};
+  const query = req.query || {};
+  const actual = req.headers["x-app-key"] || body.appKey || query.appKey;
 
   if (actual && actual !== expected) {
     res.status(403).json({ code: 403, message: "Invalid app key" });
@@ -35,18 +36,24 @@ function validateRoomId(value) {
   return roomId;
 }
 
+function validateResult(value) {
+  const result = asString(value);
+  // Keep this tolerant because the mini program stores localized labels.
+  if (!result || result.length > 12 || /[<>{}[\]\\]/.test(result)) {
+    throw badRequest("Invalid result");
+  }
+  return result;
+}
+
 function validatePredictionPayload(body = {}) {
   const matchId = validateMatchId(body.matchId);
-  const result = asString(body.result);
+  const result = validateResult(body.result);
   const score = asString(body.score);
   const totalGoals = asString(body.totalGoals);
   const firstScorer = asString(body.firstScorer).slice(0, 20);
   const firstScorerSource = SCORER_SOURCES.has(body.firstScorerSource) ? body.firstScorerSource : "manual";
   const confidence = Number(body.confidence);
 
-  if (!RESULT_OPTIONS.has(result)) {
-    throw badRequest("Invalid result");
-  }
   if (!/^\d{1,2}:\d{1,2}$/.test(score)) {
     throw badRequest("Invalid score");
   }

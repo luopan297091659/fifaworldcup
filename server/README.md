@@ -18,6 +18,49 @@ Run the smoke test:
 
 ```bash
 npm run smoke
+npm run contract
+```
+
+## Storage
+
+Default storage is file mode:
+
+```env
+STORE_DRIVER=file
+```
+
+For MySQL mode:
+
+```env
+STORE_DRIVER=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=worldcup
+DB_PASSWORD=your-password
+DB_NAME=worldcup
+```
+
+Initialize the database:
+
+```bash
+npm run db:init
+```
+
+The server uses a single JSON state table for the first production version:
+
+```text
+worldcup_app_state
+```
+
+This keeps the API stable while moving from file storage to MySQL. You can later
+split it into dedicated `users`, `matches`, `predictions`, `rooms`, and
+`rankings` tables.
+
+Migrate existing file data to MySQL:
+
+```bash
+# make sure .env has STORE_DRIVER=mysql first
+npm run db:migrate-file
 ```
 
 ## PM2
@@ -34,6 +77,19 @@ If PM2 is not installed:
 
 ```bash
 npm install -g pm2
+```
+
+One-command server scripts:
+
+```bash
+chmod +x scripts/*.sh
+./scripts/start-pm2.sh
+```
+
+After pulling new code:
+
+```bash
+./scripts/restart-pm2.sh
 ```
 
 ## Nginx
@@ -65,4 +121,11 @@ Back up MVP data:
 
 ```bash
 cp data/store.json data/store.$(date +%Y%m%d%H%M%S).json
+```
+
+Or use the helper scripts:
+
+```bash
+./scripts/backup-file-store.sh
+./scripts/backup-mysql.sh
 ```
