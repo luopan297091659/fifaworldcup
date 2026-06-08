@@ -21,7 +21,7 @@ const matches = [
 ];
 
 module.exports = {
-  appKey: "worldcup",
+  appKey: process.env.APP_KEY || "worldcup",
   tournament: {
     name: "FIFA World Cup 2026",
     openingKickoffAt,
