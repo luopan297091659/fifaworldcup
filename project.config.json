@@ -31,6 +31,7 @@
     }
   },
   "compileType": "miniprogram",
+  "miniprogramRoot": "miniprogram",
   "libVersion": "3.4.10",
   "appid": "wx1b5733aa0f1a78b0",
   "projectname": "football-predict",

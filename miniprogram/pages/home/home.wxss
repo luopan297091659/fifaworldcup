@@ -20,12 +20,19 @@
 
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 560rpx;
-  padding: 42rpx 32rpx 32rpx;
+  padding: 64rpx 32rpx 36rpx;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+}
+
+.hero-title,
+.hero-subtitle,
+.hero-meta {
+  position: relative;
+  z-index: 2;
 }
 
 .hero-meta {
