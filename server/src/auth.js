@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { readStore, updateStore } = require("./store");
+const { normalizeStoreData, readStore, updateStore } = require("./store");
 
 const DEFAULT_SECRET = "dev-secret-change-me";
 
@@ -54,8 +54,8 @@ function getTokenFromRequest(req) {
 async function getCurrentUser(req) {
   const payload = verify(getTokenFromRequest(req));
   if (!payload || !payload.userId) return null;
-  const data = await readStore();
-  return data.users[payload.userId] || null;
+  const data = normalizeStoreData(await readStore());
+  return data.users?.[payload.userId] || null;
 }
 
 async function requireUser(req, res, next) {
@@ -99,7 +99,9 @@ async function exchangeWechatOpenid(code) {
 }
 
 async function createOrUpdateUser({ code, userInfo = {} }) {
-  const safeUserInfo = userInfo && typeof userInfo === "object" ? userInfo : {};
+  const safeUserInfo = userInfo && typeof userInfo === "object" && !Array.isArray(userInfo)
+    ? userInfo
+    : {};
   const openid = await exchangeWechatOpenid(code);
   const providerOpenid = openid || (code
     ? `dev_${crypto.createHash("sha1").update(code).digest("hex").slice(0, 16)}`
@@ -107,24 +109,33 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
   const userId = `u_${providerOpenid}`;
 
   return updateStore((data) => {
-    const existing = data.users[userId] || {};
-    const name = safeUserInfo.nickName || safeUserInfo.name || existing.name || "我";
+    const normalizedData = normalizeStoreData(data);
+    const existing = normalizedData.users?.[userId] || {};
+    const name = safeUserInfo?.nickName || safeUserInfo?.name || existing?.name || "我";
     const user = {
       id: userId,
       name,
-      displayName: safeUserInfo.nickName || safeUserInfo.name || existing.displayName || name,
-      avatarUrl: safeUserInfo.avatarUrl || existing.avatarUrl || "",
-      score: existing.score || 0,
-      aiWins: existing.aiWins || 0,
-      percentile: existing.percentile || 0,
-      predictions: existing.predictions || 0,
-      title: existing.title || "新晋预测员",
-      badges: existing.badges || [],
+      displayName: safeUserInfo?.nickName || safeUserInfo?.name || existing?.displayName || name,
+      avatarUrl: safeUserInfo?.avatarUrl || existing?.avatarUrl || "",
+      score: existing?.score || 0,
+      aiWins: existing?.aiWins || 0,
+      percentile: existing?.percentile || 0,
+      predictions: existing?.predictions || 0,
+      title: existing?.title || "新晋预测员",
+      badges: existing?.badges || [],
       providerOpenid,
       updatedAt: new Date().toISOString(),
-      createdAt: existing.createdAt || new Date().toISOString()
+      createdAt: existing?.createdAt || new Date().toISOString()
     };
 
+    Object.assign(data, normalizedData, {
+      users: normalizedData.users,
+      sessions: normalizedData.sessions,
+      predictions: normalizedData.predictions,
+      matches: normalizedData.matches,
+      rooms: normalizedData.rooms,
+      rankingPlayers: normalizedData.rankingPlayers
+    });
     data.users[userId] = user;
     return {
       token: sign({ userId, providerOpenid, iat: Date.now() }),

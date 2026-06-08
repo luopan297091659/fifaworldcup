@@ -6,6 +6,10 @@ const dataDir = path.join(__dirname, "..", "data");
 const storePath = path.join(dataDir, "store.json");
 let mysqlPool = null;
 
+function isObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function ensureStore() {
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -19,10 +23,26 @@ function cloneSeed() {
   return JSON.parse(JSON.stringify(seed));
 }
 
+function normalizeStoreData(data = {}) {
+  const base = cloneSeed();
+  return {
+    ...base,
+    ...data,
+    users: isObject(data.users) ? data.users : {},
+    sessions: isObject(data.sessions) ? data.sessions : {},
+    predictions: isObject(data.predictions) ? data.predictions : {},
+    matches: Array.isArray(data.matches) ? data.matches : base.matches,
+    rooms: Array.isArray(data.rooms) ? data.rooms : base.rooms,
+    rankingPlayers: Array.isArray(data.rankingPlayers) ? data.rankingPlayers : base.rankingPlayers,
+    tournament: isObject(data.tournament) ? data.tournament : base.tournament,
+    appKey: data.appKey || base.appKey
+  };
+}
+
 function readFileStore() {
   ensureStore();
   const raw = fs.readFileSync(storePath, "utf8");
-  return JSON.parse(raw);
+  return normalizeStoreData(JSON.parse(raw));
 }
 
 function writeFileStore(data) {
@@ -85,7 +105,8 @@ async function readMysqlStore() {
   const pool = await getMysqlPool();
   const [rows] = await pool.execute("SELECT data FROM worldcup_app_state WHERE id = ?", ["main"]);
   if (!rows.length) return cloneSeed();
-  return typeof rows[0].data === "string" ? JSON.parse(rows[0].data) : rows[0].data;
+  const raw = typeof rows[0].data === "string" ? JSON.parse(rows[0].data) : rows[0].data;
+  return normalizeStoreData(raw);
 }
 
 async function updateMysqlStore(mutator) {
@@ -94,9 +115,9 @@ async function updateMysqlStore(mutator) {
   try {
     await connection.beginTransaction();
     const [rows] = await connection.execute("SELECT data FROM worldcup_app_state WHERE id = ? FOR UPDATE", ["main"]);
-    const data = rows.length
+    const data = normalizeStoreData(rows.length
       ? (typeof rows[0].data === "string" ? JSON.parse(rows[0].data) : rows[0].data)
-      : cloneSeed();
+      : cloneSeed());
     const result = mutator(data);
     await connection.execute("REPLACE INTO worldcup_app_state (id, data) VALUES (?, ?)", [
       "main",
@@ -133,6 +154,7 @@ async function updateStore(mutator) {
 }
 
 module.exports = {
+  normalizeStoreData,
   readStore,
   writeStore,
   updateStore
