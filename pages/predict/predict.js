@@ -29,7 +29,7 @@ Page({
 
   loadMatchDetail(matchId, options = {}) {
     if (!matchId) {
-      wx.showToast({ title: "比赛ID错误", icon: "none" });
+      wx.showToast({ title: "比赛 ID 错误", icon: "none" });
       setTimeout(() => wx.navigateBack(), 1500);
       return Promise.reject(new Error("match id missing"));
     }
@@ -43,7 +43,7 @@ Page({
         if (!match) {
           wx.showToast({ title: "比赛不存在", icon: "none" });
           setTimeout(() => wx.navigateBack(), 1500);
-          return;
+          return null;
         }
 
         const scoreParts = prediction ? prediction.score.split(":") : [this.data.form.homeGoals, this.data.form.awayGoals];
@@ -80,7 +80,7 @@ Page({
       .catch((error) => {
         console.error("预测页加载错误:", error);
         if (!options.keepOnError) {
-          wx.showToast({ title: "数据加载失败", icon: "none" });
+          wx.showToast({ title: "线上数据加载失败", icon: "none" });
           setTimeout(() => wx.navigateBack(), 1500);
         }
         throw error;
@@ -162,7 +162,7 @@ Page({
   setFirstScorer(event) {
     const value = event.detail.value.trim();
     if (value.length > 20) {
-      wx.showToast({ title: "球员名字不超过20个字符", icon: "none" });
+      wx.showToast({ title: "球员名字不超过 20 个字符", icon: "none" });
       return;
     }
     this.setData({
@@ -183,7 +183,7 @@ Page({
   setConfidence(event) {
     const value = Number(event.detail.value);
     if (value < 0 || value > 100) {
-      wx.showToast({ title: "信心值应该在0-100之间", icon: "none" });
+      wx.showToast({ title: "信心值应在 0-100 之间", icon: "none" });
       return;
     }
     this.setData({ "form.confidence": value });
@@ -191,23 +191,23 @@ Page({
 
   submitPrediction() {
     const { match, form } = this.data;
-    
-    // 防止已结束比赛的预测修改
+    if (!api.isLoggedIn()) {
+      wx.showToast({ title: "请先微信登录", icon: "none" });
+      return;
+    }
     if (match.status === "closed") {
       wx.showToast({ title: "比赛已结束，无法修改预测", icon: "none" });
       return;
     }
-    
     if (form.homeGoals === "" || form.awayGoals === "") {
       wx.showToast({ title: "请填写比分", icon: "none" });
       return;
     }
-    
+
     const homeGoals = Number(form.homeGoals);
     const awayGoals = Number(form.awayGoals);
-    
-    if (isNaN(homeGoals) || isNaN(awayGoals) || homeGoals < 0 || awayGoals < 0 || homeGoals > 20 || awayGoals > 20) {
-      wx.showToast({ title: "比分需在0-20之间", icon: "none" });
+    if (Number.isNaN(homeGoals) || Number.isNaN(awayGoals) || homeGoals < 0 || awayGoals < 0 || homeGoals > 20 || awayGoals > 20) {
+      wx.showToast({ title: "比分需在 0-20 之间", icon: "none" });
       return;
     }
 
@@ -225,7 +225,7 @@ Page({
     const homeGoals = Number(form.homeGoals);
     const awayGoals = Number(form.awayGoals);
 
-    const predictionPayload = {
+    api.submitPrediction({
       matchId: match.id,
       result: form.result,
       score: `${homeGoals}:${awayGoals}`,
@@ -233,9 +233,7 @@ Page({
       firstScorer: form.firstScorer,
       firstScorerSource: form.firstScorerSource || "manual",
       confidence: form.confidence
-    };
-
-    api.submitPrediction(predictionPayload)
+    })
       .then(({ prediction }) => {
         this.setData({ prediction });
         this.refreshFunCard(prediction);
@@ -264,7 +262,7 @@ Page({
     const score = prediction ? prediction.score : `${this.data.form.homeGoals}:${this.data.form.awayGoals}`;
 
     return {
-      title: funCard ? funCard.shareLine : `我预测${match.home} ${score} ${match.away}，一起看球`,
+      title: funCard ? funCard.shareLine : `我预测 ${match.home} ${score} ${match.away}，一起看球`,
       path: `/pages/predict/predict?id=${match.id}`
     };
   }

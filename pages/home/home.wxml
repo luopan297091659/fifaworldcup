@@ -1,25 +1,50 @@
 <view class="page">
-  <view class="hero">
-    <text class="hero-title">球见未来</text>
-    <text class="hero-subtitle">和朋友一起预测比分，赛后看看谁更接近。</text>
-    <view class="hero-stats">
-      <view>
-        <text class="stat-value">{{me.score}}</text>
-        <text class="stat-label">我的积分</text>
+  <view class="hero home-hero">
+    <image wx:if="{{heroImageUrl}}" class="hero-bg" src="{{heroImageUrl}}" mode="aspectFill"></image>
+    <view class="hero-shade"></view>
+    <view class="hero-content">
+      <text class="hero-title">球见未来</text>
+      <text class="hero-subtitle">{{opening.openingText || "2026 世界杯开幕战"}} · {{opening.openingMatch || "墨西哥 vs 南非"}}</text>
+      <text class="hero-meta">{{opening.openingVenue || "Mexico City Stadium"}}</text>
+
+      <view class="countdown">
+        <view class="countdown-item">
+          <text class="countdown-value">{{countdown.days}}</text>
+          <text class="countdown-label">天</text>
+        </view>
+        <view class="countdown-item">
+          <text class="countdown-value">{{countdown.hours}}</text>
+          <text class="countdown-label">时</text>
+        </view>
+        <view class="countdown-item">
+          <text class="countdown-value">{{countdown.minutes}}</text>
+          <text class="countdown-label">分</text>
+        </view>
+        <view class="countdown-item">
+          <text class="countdown-value">{{countdown.seconds}}</text>
+          <text class="countdown-label">秒</text>
+        </view>
       </view>
-      <view>
-        <text class="stat-value">{{me.aiWins}}</text>
-        <text class="stat-label">AI 对照</text>
-      </view>
-      <view>
-        <text class="stat-value">{{me.percentile}}%</text>
-        <text class="stat-label">超过好友</text>
+
+      <view class="hero-stats">
+        <view>
+          <text class="stat-value">{{me.score || 0}}</text>
+          <text class="stat-label">我的积分</text>
+        </view>
+        <view>
+          <text class="stat-value">{{me.aiWins || 0}}</text>
+          <text class="stat-label">赢过 AI</text>
+        </view>
+        <view>
+          <text class="stat-value">{{me.percentile || 0}}%</text>
+          <text class="stat-label">超过玩家</text>
+        </view>
       </view>
     </view>
   </view>
 
   <view class="section-title">近期比赛</view>
-  <view class="match-list">
+  <view class="match-list" wx:if="{{matches.length}}">
     <view class="card match-card" wx:for="{{matches}}" wx:key="id" bindtap="goPredict" data-id="{{item.id}}">
       <view class="match-head">
         <text class="tag">{{item.group}}</text>
@@ -36,13 +61,23 @@
       </view>
     </view>
   </view>
+  <view class="card empty-card" wx:else>
+    <text>暂无线上比赛数据</text>
+  </view>
 
   <view class="section-title">好友小组</view>
-  <view class="card room-preview" bindtap="goRoom">
+  <view class="card room-preview" wx:if="{{topRoom}}" bindtap="goRoom">
     <view>
       <text class="room-name">{{topRoom.name}}</text>
       <text class="muted">{{topRoom.members}} 人正在预测</text>
     </view>
     <text class="rank-badge">第 {{myRoomRank}} 名</text>
+  </view>
+  <view class="card room-preview empty-room" wx:else bindtap="goRoom">
+    <view>
+      <text class="room-name">还没有小组</text>
+      <text class="muted">创建线上小组后会在这里展示</text>
+    </view>
+    <text class="rank-badge">去创建</text>
   </view>
 </view>

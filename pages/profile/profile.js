@@ -5,7 +5,13 @@ Page({
     me: {},
     aiStats: {},
     isLoggedIn: false,
-    loginLoading: false
+    loginLoading: false,
+    profileSaving: false,
+    profileForm: {
+      name: "",
+      avatarUrl: ""
+    },
+    selectedAvatarPath: ""
   },
 
   onShow() {
@@ -18,7 +24,12 @@ Page({
         this.setData({
           me: me || {},
           aiStats: aiStats || {},
-          isLoggedIn: api.isLoggedIn()
+          isLoggedIn: api.isLoggedIn(),
+          profileForm: {
+            name: (me && (me.name || me.nickName)) || "",
+            avatarUrl: (me && me.avatarUrl) || ""
+          },
+          selectedAvatarPath: ""
         });
       })
       .catch((error) => {
@@ -50,6 +61,54 @@ Page({
       .then(() => {
         wx.showToast({ title: "已退出登录", icon: "none" });
         this.refreshProfile();
+      });
+  },
+
+  handleChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl;
+    if (!avatarUrl) return;
+
+    this.setData({
+      selectedAvatarPath: avatarUrl,
+      "profileForm.avatarUrl": avatarUrl
+    });
+  },
+
+  handleNicknameInput(event) {
+    this.setData({
+      "profileForm.name": (event.detail.value || "").trim()
+    });
+  },
+
+  handleSyncWechatProfile() {
+    if (this.data.profileSaving) return;
+
+    const name = (this.data.profileForm.name || "").trim();
+    const currentAvatar = this.data.profileForm.avatarUrl || "";
+
+    if (!name) {
+      wx.showToast({ title: "请填写昵称", icon: "none" });
+      return;
+    }
+
+    this.setData({ profileSaving: true });
+
+    const avatarTask = this.data.selectedAvatarPath
+      ? api.uploadAvatar(this.data.selectedAvatarPath)
+      : Promise.resolve(currentAvatar);
+
+    avatarTask
+      .then((avatarUrl) => api.updateProfile({ name, avatarUrl }))
+      .then(() => {
+        wx.showToast({ title: "已同步", icon: "success" });
+        this.refreshProfile();
+      })
+      .catch((error) => {
+        console.error("同步微信资料失败:", error);
+        wx.showToast({ title: "同步失败", icon: "none" });
+      })
+      .finally(() => {
+        this.setData({ profileSaving: false });
       });
   }
 });

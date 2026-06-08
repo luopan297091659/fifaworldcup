@@ -1,3 +1,11 @@
+.toolbar {
+  margin-top: 24rpx;
+}
+
+.create-btn {
+  width: 100%;
+}
+
 .room-list {
   display: flex;
   flex-direction: column;
@@ -12,6 +20,7 @@
 .room-head {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 18rpx;
 }
 
@@ -30,6 +39,32 @@
   color: #7a4b00;
   font-size: 24rpx;
   font-weight: 700;
+}
+
+.manage-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10rpx;
+}
+
+.mini-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88rpx;
+  height: 56rpx;
+  padding: 0 16rpx;
+  border: 2rpx solid #d8dee5;
+  border-radius: 8rpx;
+  background: #ffffff;
+  color: #17212b;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.danger-btn {
+  border-color: #f0c8bd;
+  color: #b64128;
 }
 
 .topic {
@@ -161,12 +196,17 @@
 
 .room-actions {
   display: grid;
-  grid-template-columns: 190rpx 1fr;
+  grid-template-columns: 170rpx 1fr 1fr;
   gap: 14rpx;
   margin-top: 24rpx;
 }
 
+.joined-actions {
+  grid-template-columns: 190rpx 1fr;
+}
+
 .cheer-btn,
+.join-btn,
 .share-btn {
   height: 78rpx;
 }

@@ -36,9 +36,24 @@ function validateRoomId(value) {
   return roomId;
 }
 
+function validateRoomName(value) {
+  const name = asString(value);
+  if (!name || name.length > 24 || /[<>{}[\]\\]/.test(name)) {
+    throw badRequest("Invalid room name");
+  }
+  return name;
+}
+
+function validateRoomPayload(body = {}) {
+  const name = validateRoomName(body.name);
+  const topic = asString(body.topic || "一起预测世界杯赛果").slice(0, 60);
+  const type = asString(body.type || "好友").slice(0, 12);
+
+  return { name, topic, type };
+}
+
 function validateResult(value) {
   const result = asString(value);
-  // Keep this tolerant because the mini program stores localized labels.
   if (!result || result.length > 12 || /[<>{}[\]\\]/.test(result)) {
     throw badRequest("Invalid result");
   }
@@ -84,5 +99,7 @@ module.exports = {
   validateAppKey,
   validateMatchId,
   validateRoomId,
+  validateRoomName,
+  validateRoomPayload,
   validatePredictionPayload
 };

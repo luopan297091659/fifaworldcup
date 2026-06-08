@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const loadEnv = require("./env");
 const apiRouter = require("./api");
 const { HttpError } = require("./errors");
@@ -29,6 +30,11 @@ app.use(createRateLimit({
   windowMs: 60 * 1000,
   max: Number(process.env.RATE_LIMIT_PER_MINUTE || 120),
   message: "Too many requests"
+}));
+
+app.use("/worldcup/assert", express.static(path.join(__dirname, "..", "assert"), {
+  maxAge: "7d",
+  fallthrough: false
 }));
 
 app.use((req, res, next) => {

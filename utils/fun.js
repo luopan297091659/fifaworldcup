@@ -7,7 +7,7 @@ const confidenceTitles = [
 
 const roasts = [
   "AI 已记录你的答案，赛后见真章。",
-  "这比分有点大胆，群里应该会有人想反驳。",
+  "这个比分有点大胆，群里应该会有人想反驳。",
   "AI 表示不同意，但它也不是每次都准。",
   "预测已封存，现在就差比赛给答案。"
 ];
@@ -20,24 +20,24 @@ const slogans = [
 ];
 
 const roomTitles = [
-  "今日神预言候选",
-  "反 AI 气氛组",
+  "今日神预测候选",
+  "对 AI 气氛组",
   "冷门观察席",
-  "嘴硬不改票"
+  "嘴硬不改神"
 ];
 
 const reviewLabels = {
   perfect: {
     title: "本场封神",
-    line: "比分完全命中，这张战报值得发到群里接受膜拜。"
+    line: "比分完全命中，这张战报值得发到群里接受掌声。"
   },
   result: {
     title: "方向正确",
-    line: "胜平负判断对了，离精准预言只差一点细节。"
+    line: "胜平负判断对了，离精准预测只差一点细节。"
   },
   goals: {
     title: "球感在线",
-    line: "总进球区间猜中了，至少比赛节奏你摸得很准。"
+    line: "总进球区间猜中了，至少比赛节奏摸得很准。"
   },
   close: {
     title: "差一点封神",
@@ -64,7 +64,7 @@ function getSlogan(seed) {
 function buildShareLine(match, score, confidence) {
   const title = getConfidenceTitle(confidence);
   const seed = Number(score.replace(":", "")) + confidence;
-  return `${getSlogan(seed)}：${match.home} ${score} ${match.away}，${title}`;
+  return `${getSlogan(seed)}，${match.home} ${score} ${match.away}，${title}`;
 }
 
 function buildPredictionTags(prediction) {
@@ -89,7 +89,7 @@ function buildPredictionTags(prediction) {
   }
 
   if (homeGoals === awayGoals) {
-    tags.push("平局信徒");
+    tags.push("平局信仰");
   } else if (Math.abs(homeGoals - awayGoals) >= 2) {
     tags.push("胜负手很硬");
   }

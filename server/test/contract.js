@@ -56,12 +56,53 @@ async function main() {
     assert(Array.isArray(rooms.rooms), "rooms.rooms must be an array");
     assert(rooms.rooms[0].players && Array.isArray(rooms.rooms[0].players), "room.players must be an array");
 
+    const createdRoom = await request(base, "/worldcup/rooms/create", {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({ name: `测试小组${Date.now()}` })
+    });
+    assert(createdRoom.room && createdRoom.room.id, "created room is required");
+    assert(createdRoom.room.ownerId === login.user.id, "created room owner is required");
+
+    const updatedRoom = await request(base, "/worldcup/rooms/update", {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({
+        roomId: createdRoom.room.id,
+        name: "改名后的小组",
+        topic: createdRoom.room.topic,
+        type: createdRoom.room.type
+      })
+    });
+    assert(updatedRoom.room.name === "改名后的小组", "updated room name is required");
+
+    const secondLogin = await request(base, "/worldcup/login", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ code: `joiner-${Date.now()}`, silent: true })
+    });
+    const secondAuthHeaders = { ...headers, authorization: `Bearer ${secondLogin.token}` };
+    const joinedRoom = await request(base, "/worldcup/rooms/join", {
+      method: "POST",
+      headers: secondAuthHeaders,
+      body: JSON.stringify({ roomId: createdRoom.room.id })
+    });
+    const joined = joinedRoom.rooms.find((room) => room.id === createdRoom.room.id);
+    assert(joined && joined.joined, "joined room should be marked joined");
+
     const cheer = await request(base, "/worldcup/rooms/cheer", {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify({ roomId: rooms.rooms[0].id })
     });
     assert(Array.isArray(cheer.rooms), "cheer.rooms must be an array");
+
+    const deletedRoom = await request(base, "/worldcup/rooms/delete", {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({ roomId: createdRoom.room.id })
+    });
+    assert(!deletedRoom.rooms.some((room) => room.id === createdRoom.room.id), "deleted room should be removed");
 
     const ranking = await request(base, "/worldcup/rankings?scope=friends", { headers: authHeaders });
     assert(ranking.me && Array.isArray(ranking.players), "ranking fields are required");

@@ -21,6 +21,29 @@
     <button class="link-btn" bindtap="handleLogout">退出</button>
   </view>
 
+  <view wx:if="{{isLoggedIn}}" class="card profile-sync-card">
+    <view class="sync-head">
+      <text class="login-title">同步微信资料</text>
+      <text class="login-desc">保存后昵称头像会同步到个人页和排行榜。</text>
+    </view>
+    <view class="profile-form">
+      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="handleChooseAvatar">
+        <image wx:if="{{profileForm.avatarUrl}}" class="avatar-img" src="{{profileForm.avatarUrl}}" mode="aspectFill"></image>
+        <text wx:else class="avatar">我</text>
+      </button>
+      <input
+        class="nickname-input"
+        type="nickname"
+        value="{{profileForm.name}}"
+        placeholder="填写微信昵称"
+        bindinput="handleNicknameInput"
+      />
+    </view>
+    <button class="primary-btn login-btn" loading="{{profileSaving}}" bindtap="handleSyncWechatProfile">
+      {{profileSaving ? "同步中" : "同步昵称头像"}}
+    </button>
+  </view>
+
   <view class="stats">
     <view class="card stat">
       <text class="stat-value">{{me.score}}</text>

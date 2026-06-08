@@ -4,12 +4,27 @@
     <text class="hero-subtitle">把小组发到群里，每场比赛一起记录预测。</text>
   </view>
 
+  <view class="toolbar">
+    <button class="primary-btn create-btn" bindtap="createRoom">创建小组</button>
+  </view>
+
   <view class="room-list">
     <view class="card room-card" wx:for="{{rooms}}" wx:key="id">
       <view class="room-head">
         <view>
           <text class="room-name">{{item.name}}</text>
-          <text class="muted">{{item.type}} · {{item.members}} 人</text>
+          <text class="muted">{{item.type}} · {{item.members}} 人 · {{item.joined ? "已加入" : "未加入"}}</text>
+        </view>
+        <view wx:if="{{item.canManage}}" class="manage-actions">
+          <button
+            class="mini-btn"
+            bindtap="editRoom"
+            data-id="{{item.id}}"
+            data-name="{{item.name}}"
+            data-topic="{{item.topic}}"
+            data-type="{{item.type}}"
+          >改名</button>
+          <button class="mini-btn danger-btn" bindtap="deleteRoom" data-id="{{item.id}}">删除</button>
         </view>
       </view>
 
@@ -37,16 +52,23 @@
       </view>
 
       <view class="rank-list">
-        <view class="{{player.id === 'me' ? 'rank-row me' : 'rank-row'}}" wx:for="{{item.players}}" wx:for-item="player" wx:for-index="index" wx:key="id">
+        <view class="{{player.isMe ? 'rank-row me' : 'rank-row'}}" wx:for="{{item.players}}" wx:for-item="player" wx:for-index="index" wx:key="id">
           <text class="rank-no">{{index + 1}}</text>
           <text class="rank-name">{{player.name}}</text>
           <text class="rank-score">{{player.score}} 分</text>
         </view>
       </view>
 
-      <view class="room-actions">
+      <view class="{{item.joined ? 'room-actions joined-actions' : 'room-actions'}}">
         <button class="ghost-btn cheer-btn" bindtap="cheerRoom" data-id="{{item.id}}">助威 {{item.cheers}}</button>
-        <button class="primary-btn share-btn" open-type="share" data-room="{{item.name}}">邀请群友一起看</button>
+        <button
+          wx:if="{{!item.joined}}"
+          class="primary-btn join-btn"
+          loading="{{actionRoomId === item.id}}"
+          bindtap="joinRoom"
+          data-id="{{item.id}}"
+        >加入小组</button>
+        <button class="primary-btn share-btn" open-type="share" data-id="{{item.id}}" data-room="{{item.name}}">邀请群友一起看</button>
       </view>
     </view>
   </view>

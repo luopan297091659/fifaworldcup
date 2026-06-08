@@ -78,7 +78,7 @@
 客户端启动时会静默调用 `wx.login`，并向 `/worldcup/login` 提交：
 
 - `code`：微信临时登录凭证，服务端用它换取 `openid`/`unionid`
-- `userInfo`：用户点击“微信一键登录”后才会带上昵称、头像
+- `userInfo`：保留兼容字段，正式昵称头像以资料同步接口为准
 - `silent`：是否为启动时静默登录
 
 接口建议返回：
@@ -98,3 +98,45 @@
 ```
 
 客户端会把 `token` 存到本地，后续请求通过 `Authorization: Bearer <token>` 传给服务端。
+
+## 微信资料同步接口
+
+昵称头像同步分两步：
+
+1. 用户通过微信头像选择能力拿到头像临时文件，客户端调用 `POST /worldcup/profile/avatar` 上传文件字段 `file`。
+2. 用户通过微信昵称输入能力确认昵称，客户端调用 `POST /worldcup/profile/update` 保存资料。
+
+头像上传接口建议返回：
+
+```json
+{
+  "code": 0,
+  "data": {
+    "avatarUrl": "https://cdn.example.com/avatar/user.png"
+  }
+}
+```
+
+资料更新接口请求体：
+
+```json
+{
+  "name": "微信昵称",
+  "avatarUrl": "https://cdn.example.com/avatar/user.png"
+}
+```
+
+资料更新接口建议返回最新用户：
+
+```json
+{
+  "code": 0,
+  "data": {
+    "user": {
+      "id": "openid-or-user-id",
+      "name": "微信昵称",
+      "avatarUrl": "https://cdn.example.com/avatar/user.png"
+    }
+  }
+}
+```

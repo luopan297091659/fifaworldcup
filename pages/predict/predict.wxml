@@ -57,7 +57,7 @@
 
     <text class="lineup-empty" wx:else>暂未拿到首发名单，可以先手动填写。</text>
   </view>
-  <input class="text-input" placeholder="例如：三笘薰" value="{{form.firstScorer}}" bindinput="setFirstScorer" />
+  <input class="text-input" placeholder="例如：希门尼斯" value="{{form.firstScorer}}" bindinput="setFirstScorer" />
 
   <view class="section-title">信心值</view>
   <view class="confidence-card">

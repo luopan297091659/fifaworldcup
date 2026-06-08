@@ -11,11 +11,14 @@ function base64url(input) {
     .replace(/\//g, "_");
 }
 
+function signingSecret() {
+  return process.env.JWT_SECRET || DEFAULT_SECRET;
+}
+
 function sign(payload) {
-  const secret = process.env.JWT_SECRET || DEFAULT_SECRET;
   const body = base64url(JSON.stringify(payload));
   const signature = crypto
-    .createHmac("sha256", secret)
+    .createHmac("sha256", signingSecret())
     .update(body)
     .digest("base64")
     .replace(/=/g, "")
@@ -28,7 +31,7 @@ function verify(token) {
   if (!token || !token.includes(".")) return null;
   const [body, signature] = token.split(".");
   const expected = crypto
-    .createHmac("sha256", process.env.JWT_SECRET || DEFAULT_SECRET)
+    .createHmac("sha256", signingSecret())
     .update(body)
     .digest("base64")
     .replace(/=/g, "")
@@ -93,17 +96,18 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
 
   return updateStore((data) => {
     const existing = data.users[userId] || {};
+    const name = userInfo.nickName || userInfo.name || existing.name || "我";
     const user = {
       id: userId,
-      name: userInfo.nickName || userInfo.name || existing.name || "我",
-      displayName: userInfo.nickName || userInfo.name || existing.displayName || "我",
+      name,
+      displayName: userInfo.nickName || userInfo.name || existing.displayName || name,
       avatarUrl: userInfo.avatarUrl || existing.avatarUrl || "",
       score: existing.score || 0,
       aiWins: existing.aiWins || 0,
-      percentile: existing.percentile || 68,
+      percentile: existing.percentile || 0,
       predictions: existing.predictions || 0,
-      title: existing.title || "稳健预言家",
-      badges: existing.badges || ["首场预测", "和 AI 掰手腕"],
+      title: existing.title || "新晋预测员",
+      badges: existing.badges || [],
       providerOpenid,
       updatedAt: new Date().toISOString(),
       createdAt: existing.createdAt || new Date().toISOString()

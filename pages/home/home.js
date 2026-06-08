@@ -4,20 +4,41 @@ Page({
   data: {
     me: {},
     matches: [],
-    topRoom: {},
-    myRoomRank: 0
+    topRoom: null,
+    myRoomRank: 0,
+    opening: {},
+    heroImageUrl: "",
+    countdown: {
+      days: "00",
+      hours: "00",
+      minutes: "00",
+      seconds: "00",
+      finished: false
+    }
   },
 
   onShow() {
+    this.loadHome();
+  },
+
+  onHide() {
+    this.stopCountdown();
+  },
+
+  onUnload() {
+    this.stopCountdown();
+  },
+
+  loadHome() {
     api.getHome()
       .then((homeData) => {
-        if (!homeData || !homeData.me || !homeData.rooms || !homeData.matches) {
-          wx.showToast({ title: "数据不可用", icon: "none" });
+        if (!homeData || !homeData.me || !Array.isArray(homeData.matches)) {
+          wx.showToast({ title: "线上数据不可用", icon: "none" });
           return;
         }
 
         const predictions = homeData.predictions || {};
-        const topRoom = homeData.topRoom || homeData.rooms[0];
+        const topRoom = homeData.topRoom || null;
         const myRoomRank = typeof homeData.myRoomRank === "number"
           ? homeData.myRoomRank
           : this.getMyRoomRank(topRoom, homeData.me.id);
@@ -31,14 +52,73 @@ Page({
               ? `AI：${match.aiPick} ${match.aiScore}`
               : "提交后显示 AI 参考"
           })),
-          topRoom: topRoom || {},
-          myRoomRank
+          topRoom,
+          myRoomRank,
+          opening: homeData.opening || {},
+          heroImageUrl: (homeData.opening && homeData.opening.heroImageUrl) || ""
+        }, () => {
+          this.startCountdown(this.data.opening.openingKickoffAt);
         });
       })
       .catch((error) => {
         console.error("首页加载错误:", error);
-        wx.showToast({ title: "数据不可用", icon: "none" });
+        wx.showToast({ title: "线上数据不可用", icon: "none" });
       });
+  },
+
+  startCountdown(openingKickoffAt) {
+    this.stopCountdown();
+    this.updateCountdown(openingKickoffAt);
+    this.countdownTimer = setInterval(() => {
+      this.updateCountdown(openingKickoffAt);
+    }, 1000);
+  },
+
+  stopCountdown() {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  },
+
+  updateCountdown(openingKickoffAt) {
+    const target = openingKickoffAt ? new Date(openingKickoffAt).getTime() : 0;
+    const diff = target - Date.now();
+    if (!target || diff <= 0) {
+      this.setData({
+        countdown: {
+          days: "00",
+          hours: "00",
+          minutes: "00",
+          seconds: "00",
+          finished: true
+        }
+      });
+      this.stopCountdown();
+      return;
+    }
+
+    const dayMs = 24 * 60 * 60 * 1000;
+    const hourMs = 60 * 60 * 1000;
+    const minuteMs = 60 * 1000;
+    const days = Math.floor(diff / dayMs);
+    const hours = Math.floor((diff % dayMs) / hourMs);
+    const minutes = Math.floor((diff % hourMs) / minuteMs);
+    const seconds = Math.floor((diff % minuteMs) / 1000);
+
+    this.setData({
+      countdown: {
+        days: this.pad(days),
+        hours: this.pad(hours),
+        minutes: this.pad(minutes),
+        seconds: this.pad(seconds),
+        finished: false
+      }
+    });
+  },
+
+  pad(value) {
+    return String(value).padStart(2, "0");
   },
 
   getMyRoomRank(room, userId) {
@@ -50,12 +130,12 @@ Page({
 
   goPredict(event) {
     const id = event.currentTarget.dataset.id;
-    
+
     if (!id) {
-      wx.showToast({ title: "比赛ID错误", icon: "none" });
+      wx.showToast({ title: "比赛 ID 错误", icon: "none" });
       return;
     }
-    
+
     api.getMatchDetail(id)
       .then(({ match }) => {
         if (!match) {
