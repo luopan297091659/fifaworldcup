@@ -68,9 +68,20 @@ async function requireUser(req, res, next) {
   next();
 }
 
+function resolveWechatCredentials() {
+  return {
+    appid: process.env.WECHAT_APPID || process.env.WX_APPID || process.env.APPID || "",
+    secret: process.env.WECHAT_SECRET
+      || process.env.WECHAT_APPSECRET
+      || process.env.WECHAT_APP_SECRET
+      || process.env.WX_SECRET
+      || process.env.APP_SECRET
+      || ""
+  };
+}
+
 async function exchangeWechatOpenid(code) {
-  const appid = process.env.WECHAT_APPID;
-  const secret = process.env.WECHAT_SECRET;
+  const { appid, secret } = resolveWechatCredentials();
   if (!appid || !secret || !code) return null;
 
   const url = new URL("https://api.weixin.qq.com/sns/jscode2session");
@@ -88,6 +99,7 @@ async function exchangeWechatOpenid(code) {
 }
 
 async function createOrUpdateUser({ code, userInfo = {} }) {
+  const safeUserInfo = userInfo && typeof userInfo === "object" ? userInfo : {};
   const openid = await exchangeWechatOpenid(code);
   const providerOpenid = openid || (code
     ? `dev_${crypto.createHash("sha1").update(code).digest("hex").slice(0, 16)}`
@@ -96,12 +108,12 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
 
   return updateStore((data) => {
     const existing = data.users[userId] || {};
-    const name = userInfo.nickName || userInfo.name || existing.name || "我";
+    const name = safeUserInfo.nickName || safeUserInfo.name || existing.name || "我";
     const user = {
       id: userId,
       name,
-      displayName: userInfo.nickName || userInfo.name || existing.displayName || name,
-      avatarUrl: userInfo.avatarUrl || existing.avatarUrl || "",
+      displayName: safeUserInfo.nickName || safeUserInfo.name || existing.displayName || name,
+      avatarUrl: safeUserInfo.avatarUrl || existing.avatarUrl || "",
       score: existing.score || 0,
       aiWins: existing.aiWins || 0,
       percentile: existing.percentile || 0,

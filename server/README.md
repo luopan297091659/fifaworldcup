@@ -68,7 +68,8 @@ npm run db:migrate-file
 ```bash
 cd server
 cp .env.example .env
-# edit .env, especially JWT_SECRET, WECHAT_APPID, WECHAT_SECRET
+# edit .env, especially JWT_SECRET, WECHAT_APPID, and the WeChat AppSecret
+# The server accepts WECHAT_SECRET, WECHAT_APPSECRET, or WECHAT_APP_SECRET.
 pm2 start ecosystem.config.js
 pm2 save
 ```

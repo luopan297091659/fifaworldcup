@@ -1,4 +1,7 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
 const { createOrUpdateUser, getCurrentUser } = require("./auth");
 const { badRequest, notFound, unauthorized } = require("./errors");
 const { readStore, updateStore } = require("./store");
@@ -11,6 +14,19 @@ const {
 } = require("./validators");
 
 const router = express.Router();
+const uploadDir = path.join(__dirname, "..", "assert", "uploads");
+fs.mkdirSync(uploadDir, { recursive: true });
+const upload = multer({
+  dest: uploadDir,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    if (!/^image\//.test(file.mimetype || "")) {
+      cb(new Error("Only image files are allowed"));
+      return;
+    }
+    cb(null, true);
+  }
+});
 
 router.use(validateAppKey);
 
@@ -371,6 +387,58 @@ router.get("/profile", asyncRoute(async (req, res) => {
       totalCompared
     }
   }));
+}));
+
+router.post("/profile/update", asyncRoute(async (req, res) => {
+  const currentUser = await getCurrentUser(req);
+  if (!currentUser) {
+    throw unauthorized();
+  }
+
+  const { name, avatarUrl } = req.body || {};
+  const nextName = typeof name === "string" ? name.trim() : "";
+  const nextAvatarUrl = typeof avatarUrl === "string" ? avatarUrl.trim() : "";
+
+  const result = await updateStore((data) => {
+    const user = data.users[currentUser.id];
+    if (!user) {
+      throw notFound("User not found");
+    }
+    if (nextName) {
+      user.name = nextName;
+      user.displayName = nextName;
+    }
+    if (nextAvatarUrl) {
+      user.avatarUrl = nextAvatarUrl;
+    }
+    user.updatedAt = new Date().toISOString();
+    return { user };
+  });
+
+  res.json(ok(result));
+}));
+
+router.post("/profile/avatar", upload.single("file"), asyncRoute(async (req, res) => {
+  const currentUser = await getCurrentUser(req);
+  if (!currentUser) {
+    throw unauthorized();
+  }
+  if (!req.file) {
+    throw badRequest("Missing uploaded file");
+  }
+
+  const avatarUrl = `/worldcup/assert/uploads/${req.file.filename}`;
+  const result = await updateStore((data) => {
+    const user = data.users[currentUser.id];
+    if (!user) {
+      throw notFound("User not found");
+    }
+    user.avatarUrl = avatarUrl;
+    user.updatedAt = new Date().toISOString();
+    return { avatarUrl, user };
+  });
+
+  res.json(ok(result));
 }));
 
 module.exports = router;
