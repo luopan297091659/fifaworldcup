@@ -1,7 +1,10 @@
 .tabs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10rpx;
+  gap: 8rpx;
+  padding: 6rpx;
+  border-radius: 18rpx;
+  background: rgba(23, 33, 43, 0.04);
 }
 
 .tab {
@@ -9,8 +12,8 @@
   align-items: center;
   justify-content: center;
   height: 70rpx;
-  border-radius: 8rpx;
-  background: #ffffff;
+  border-radius: 14rpx;
+  background: transparent;
   color: #68717d;
   font-size: 24rpx;
   font-weight: 800;
@@ -22,8 +25,8 @@
 }
 
 .rank-summary {
-  margin-top: 24rpx;
-  padding: 28rpx;
+  margin-top: 18rpx;
+  padding: 22rpx;
 }
 
 .summary-value {
@@ -34,8 +37,8 @@
 }
 
 .leaderboard {
-  margin-top: 24rpx;
-  padding: 12rpx 26rpx;
+  margin-top: 18rpx;
+  padding: 10rpx 18rpx;
 }
 
 .rank-row {
