@@ -98,6 +98,14 @@ async function exchangeWechatOpenid(code) {
   return body.openid;
 }
 
+function isMeaningfulName(name) {
+  return typeof name === "string"
+    && name.trim()
+    && name.trim() !== "我"
+    && name.trim() !== "微信用户"
+    && name.trim() !== "未登录用户";
+}
+
 async function createOrUpdateUser({ code, userInfo = {} }) {
   const safeUserInfo = userInfo && typeof userInfo === "object" && !Array.isArray(userInfo)
     ? userInfo
@@ -111,11 +119,16 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
   return updateStore((data) => {
     const normalizedData = normalizeStoreData(data);
     const existing = normalizedData.users?.[userId] || {};
-    const name = safeUserInfo?.nickName || safeUserInfo?.name || existing?.name || "我";
+    const profileName = isMeaningfulName(safeUserInfo?.nickName)
+      ? safeUserInfo.nickName.trim()
+      : isMeaningfulName(safeUserInfo?.name)
+        ? safeUserInfo.name.trim()
+        : "";
+    const name = profileName || existing?.name || "我";
     const user = {
       id: userId,
       name,
-      displayName: safeUserInfo?.nickName || safeUserInfo?.name || existing?.displayName || name,
+      displayName: profileName || existing?.displayName || name,
       avatarUrl: safeUserInfo?.avatarUrl || existing?.avatarUrl || "",
       score: existing?.score || 0,
       aiWins: existing?.aiWins || 0,

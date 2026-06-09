@@ -16,11 +16,42 @@ const {
 const router = express.Router();
 const uploadDir = path.join(__dirname, "..", "assert", "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
+
+function uploadExtension(file) {
+  const mimeType = file.mimetype || "";
+  if (mimeType === "image/png") return ".png";
+  if (mimeType === "image/webp") return ".webp";
+  if (mimeType === "image/gif") return ".gif";
+  if (mimeType === "image/heic") return ".heic";
+  if (mimeType === "image/heif") return ".heif";
+  if (mimeType === "image/jpeg" || mimeType === "image/jpg") return ".jpg";
+
+  const originalExt = path.extname(file.originalname || "").toLowerCase();
+  if ([".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"].includes(originalExt)) {
+    return originalExt === ".jpeg" ? ".jpg" : originalExt;
+  }
+  return ".jpg";
+}
+
+const uploadStorage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename(req, file, cb) {
+    const safeName = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}${uploadExtension(file)}`;
+    cb(null, safeName);
+  }
+});
+
 const upload = multer({
-  dest: uploadDir,
+  storage: uploadStorage,
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter(req, file, cb) {
-    if (!/^image\//.test(file.mimetype || "")) {
+    const mimeType = file.mimetype || "";
+    const originalExt = path.extname(file.originalname || "").toLowerCase();
+    const isWechatAvatarUpload = !mimeType || mimeType === "application/octet-stream";
+    const hasImageExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"].includes(originalExt);
+    if (!/^image\//.test(mimeType) && !isWechatAvatarUpload && !hasImageExt) {
       cb(new Error("Only image files are allowed"));
       return;
     }
@@ -117,6 +148,14 @@ function roomPlayerFromUser(me) {
     name: me.name || me.displayName || "我",
     score: me.score || 0
   };
+}
+
+function isMeaningfulProfileName(name) {
+  return typeof name === "string"
+    && name.trim()
+    && name.trim() !== "我"
+    && name.trim() !== "微信用户"
+    && name.trim() !== "未登录用户";
 }
 
 function makeRoomId() {
@@ -396,7 +435,7 @@ router.post("/profile/update", asyncRoute(async (req, res) => {
   }
 
   const { name, avatarUrl } = req.body || {};
-  const nextName = typeof name === "string" ? name.trim() : "";
+  const nextName = isMeaningfulProfileName(name) ? name.trim() : "";
   const nextAvatarUrl = typeof avatarUrl === "string" ? avatarUrl.trim() : "";
 
   const result = await updateStore((data) => {

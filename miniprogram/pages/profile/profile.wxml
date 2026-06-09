@@ -1,47 +1,46 @@
 <view class="page">
   <view class="card profile-card">
-    <image wx:if="{{me.avatarUrl}}" class="avatar-img" src="{{me.avatarUrl}}" mode="aspectFill"></image>
-    <text wx:else class="avatar">我</text>
-    <text class="name">{{me.name}}</text>
+    <button wx:if="{{isLoggedIn}}" class="profile-avatar-button" open-type="chooseAvatar" plain="true" hover-class="none" bindchooseavatar="handleChooseAvatar">
+      <image wx:if="{{profileForm.avatarUrl || me.avatarUrl}}" class="avatar-img" src="{{profileForm.avatarUrl || me.avatarUrl}}" mode="aspectFill"></image>
+      <text wx:else class="avatar">我</text>
+    </button>
+    <block wx:else>
+      <image wx:if="{{me.avatarUrl || profileForm.avatarUrl}}" class="avatar-img" src="{{me.avatarUrl || profileForm.avatarUrl}}" mode="aspectFill"></image>
+      <text wx:else class="avatar">{{me.name || me.displayName || '我'}}</text>
+    </block>
+
+    <input
+      wx:if="{{isLoggedIn}}"
+      class="profile-name-input"
+      type="nickname"
+      placeholder="点击选择微信昵称"
+      value="{{profileForm.name}}"
+      maxlength="32"
+      confirm-type="done"
+      bindinput="handleNicknameInput"
+      bindblur="handleNicknameInput"
+      bindconfirm="handleNicknameInput"
+    />
+    <text wx:else class="name">{{me.name || me.displayName || '我'}}</text>
     <text class="title-badge">{{me.title}}</text>
     <text class="muted">预测 {{me.predictions}} 场 · AI 对照 {{me.aiWins}} 次</text>
+    <button wx:if="{{isLoggedIn}}" class="profile-sync-btn" loading="{{profileSaving}}" bindtap="handleSyncWechatProfile">
+      {{profileSaving ? "保存中" : (profileNeedsSync ? "确认同步头像昵称" : "更新头像昵称")}}
+    </button>
   </view>
 
   <view wx:if="{{!isLoggedIn}}" class="card login-card">
     <view>
       <text class="login-title">微信登录</text>
-      <text class="login-desc">登录后可同步昵称头像，并为正式服务端保存预测记录。</text>
+      <text class="login-desc">登录后可同步昵称与头像，并为正式服务端保存预测记录。</text>
     </view>
     <button class="primary-btn login-btn" loading="{{loginLoading}}" bindtap="handleWechatLogin">
       {{loginLoading ? "登录中" : "微信一键登录"}}
     </button>
   </view>
   <view wx:else class="card action-row">
-    <text>已登录微信账号</text>
+    <text>{{profileNeedsSync ? '已登录，请同步头像/昵称' : '已登录并同步头像/昵称'}}</text>
     <button class="link-btn" bindtap="handleLogout">退出</button>
-  </view>
-
-  <view wx:if="{{isLoggedIn}}" class="card profile-sync-card">
-    <view class="sync-head">
-      <text class="login-title">同步微信资料</text>
-      <text class="login-desc">保存后昵称头像会同步到个人页和排行榜。</text>
-    </view>
-    <view class="profile-form">
-      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="handleChooseAvatar">
-        <image wx:if="{{profileForm.avatarUrl}}" class="avatar-img" src="{{profileForm.avatarUrl}}" mode="aspectFill"></image>
-        <text wx:else class="avatar">我</text>
-      </button>
-      <input
-        class="nickname-input"
-        type="nickname"
-        value="{{profileForm.name}}"
-        placeholder="填写微信昵称"
-        bindinput="handleNicknameInput"
-      />
-    </view>
-    <button class="primary-btn login-btn" loading="{{profileSaving}}" bindtap="handleSyncWechatProfile">
-      {{profileSaving ? "同步中" : "同步昵称头像"}}
-    </button>
   </view>
 
   <view class="stats">

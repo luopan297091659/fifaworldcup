@@ -45,12 +45,87 @@ function setCachedUser(user) {
   }
 }
 
+function normalizeAvatarUrl(avatarUrl) {
+  if (typeof avatarUrl !== "string") return "";
+  const trimmed = avatarUrl.trim();
+  if (!trimmed) return "";
+  if (/^(https?:\/\/|wxfile:\/\/|http:\/\/tmp\/|https:\/\/tmp\/)/.test(trimmed)) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("/") && config.baseUrl) {
+    return `${config.baseUrl.replace(/\/$/, "")}${trimmed}`;
+  }
+  return trimmed;
+}
+
 function updateCurrentUser(user) {
   if (!user) return user;
   const app = getApp();
-  app.globalData.user = user;
-  setCachedUser(user);
-  return user;
+  const cachedUser = getCachedUser() || {};
+  const nextUser = {
+    ...cachedUser,
+    ...(user || {})
+  };
+  const incomingName = user.name || user.nickName || user.displayName || "";
+  const cachedName = cachedUser.name || cachedUser.nickName || cachedUser.displayName || "";
+  if (!isMeaningfulNickName(incomingName) && isMeaningfulNickName(cachedName)) {
+    nextUser.name = cachedName;
+    nextUser.displayName = cachedName;
+    nextUser.nickName = cachedName;
+  }
+  const avatarUrl = normalizeAvatarUrl(nextUser.avatarUrl || nextUser.avatar || "");
+  if (avatarUrl) {
+    nextUser.avatarUrl = avatarUrl;
+    nextUser.avatar = avatarUrl;
+  }
+
+  app.globalData.user = nextUser;
+  setCachedUser(nextUser);
+  return nextUser;
+}
+
+function isMeaningfulNickName(name) {
+  return typeof name === "string"
+    && name.trim()
+    && name.trim() !== "我"
+    && name.trim() !== "微信用户"
+    && name.trim() !== "未登录用户";
+}
+
+function normalizeWechatUserInfo(userInfo) {
+  if (!userInfo || typeof userInfo !== "object") return null;
+
+  const nickName = isMeaningfulNickName(userInfo.nickName)
+    ? userInfo.nickName.trim()
+    : "";
+  const avatarUrl = normalizeAvatarUrl(userInfo.avatarUrl);
+
+  if (!nickName && !avatarUrl) return null;
+  return {
+    ...userInfo,
+    nickName,
+    avatarUrl
+  };
+}
+
+function mergeUserWithWeChatInfo(user, userInfo) {
+  if (!user || typeof user !== "object") return user;
+  if (!userInfo || typeof userInfo !== "object") return user;
+
+  const nickName = isMeaningfulNickName(userInfo.nickName)
+    ? userInfo.nickName.trim()
+    : user.nickName || user.name || user.displayName || "我";
+  const name = nickName;
+  const avatar = normalizeAvatarUrl(userInfo.avatarUrl || user.avatarUrl || user.avatar || "");
+
+  return {
+    ...user,
+    nickName,
+    name,
+    displayName: name,
+    avatarUrl: avatar,
+    avatar
+  };
 }
 
 function getWxLoginCode() {
@@ -161,17 +236,87 @@ function upload(endpointKey, filePath, formData = {}) {
   });
 }
 
+function getWechatUserInfo() {
+  return new Promise((resolve, reject) => {
+    if (typeof wx.getUserProfile === "function") {
+      wx.getUserProfile({
+        desc: "用于同步昵称和头像",
+        lang: "zh_CN",
+        success: (res) => resolve(res.userInfo || null),
+        fail: reject
+      });
+      return;
+    }
+
+    if (typeof wx.getUserInfo === "function") {
+      wx.getUserInfo({
+        success: (res) => resolve(res.userInfo || null),
+        fail: reject
+      });
+      return;
+    }
+
+    reject(new Error("当前微信环境不支持获取用户资料"));
+  });
+}
+
 function login(options = {}) {
   return getWxLoginCode()
     .then((code) => request("login", {
       code,
       userInfo: options.userInfo || null,
       silent: Boolean(options.silent)
-    }));
+    }))
+    .then((result) => {
+      const userInfo = options.userInfo || null;
+      if (!userInfo) return result;
+
+      const mergedUser = mergeUserWithWeChatInfo(result.user || result.me || {}, userInfo);
+      if (mergedUser) {
+        updateCurrentUser(mergedUser);
+        return {
+          ...result,
+          user: mergedUser,
+          me: mergedUser
+        };
+      }
+      return result;
+    });
+}
+
+function syncWechatProfileToCache(userInfo) {
+  if (!userInfo || typeof userInfo !== "object") return null;
+
+  const currentUser = getCachedUser() || {};
+  const nickName = isMeaningfulNickName(userInfo.nickName)
+    ? userInfo.nickName.trim()
+    : "";
+  const nextUser = {
+    ...currentUser,
+    name: nickName || currentUser.name || currentUser.displayName || "我",
+    displayName: nickName || currentUser.displayName || currentUser.name || "我",
+    avatarUrl: normalizeAvatarUrl(userInfo.avatarUrl || currentUser.avatarUrl || currentUser.avatar || ""),
+    avatar: normalizeAvatarUrl(userInfo.avatarUrl || currentUser.avatarUrl || currentUser.avatar || "")
+  };
+
+  updateCurrentUser(nextUser);
+  return nextUser;
 }
 
 function loginWithWechatProfile() {
-  return login();
+  return getWechatUserInfo()
+    .then((userInfo) => {
+      const normalizedUserInfo = normalizeWechatUserInfo(userInfo);
+      if (!normalizedUserInfo) {
+        return login({ userInfo: null });
+      }
+      syncWechatProfileToCache(normalizedUserInfo);
+      return login({ userInfo: normalizedUserInfo });
+    })
+    .catch((error) => {
+      console.warn("获取微信用户资料失败，回退到静默登录:", error);
+      return login({ userInfo: null });
+    });
 }
 
 function logout() {
@@ -187,7 +332,7 @@ function isLoggedIn() {
 
 function uploadAvatar(filePath) {
   return upload("uploadAvatar", filePath).then((data) => {
-    const avatarUrl = data.avatarUrl || data.url || "";
+    const avatarUrl = normalizeAvatarUrl(data.avatarUrl || data.url || "");
     if (!avatarUrl) {
       throw new Error("头像上传接口未返回 avatarUrl");
     }
