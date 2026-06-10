@@ -78,6 +78,9 @@ function updateCurrentUser(user) {
     nextUser.avatarUrl = avatarUrl;
     nextUser.avatar = avatarUrl;
   }
+  if (!nextUser.nickName && (nextUser.name || nextUser.displayName)) {
+    nextUser.nickName = nextUser.name || nextUser.displayName;
+  }
 
   app.globalData.user = nextUser;
   setCachedUser(nextUser);

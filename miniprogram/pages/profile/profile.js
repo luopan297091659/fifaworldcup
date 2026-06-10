@@ -141,14 +141,24 @@ Page({
     }
 
     this.setData({ profileSaving: true });
+    const currentCachedUser = api.getCachedUser && api.getCachedUser();
+    const fallbackAvatar = avatarUrl
+      || currentCachedUser?.avatarUrl
+      || currentCachedUser?.avatar
+      || "";
+
     const avatarTask = selectedAvatarPath
       ? api.uploadAvatar(selectedAvatarPath)
-      : Promise.resolve(avatarUrl);
+          .catch((error) => {
+            console.warn("上传头像失败，回退到当前头像:", error);
+            return fallbackAvatar;
+          })
+      : Promise.resolve(fallbackAvatar);
 
     avatarTask
       .then((uploadedAvatarUrl) => api.updateProfile({
         name,
-        avatarUrl: uploadedAvatarUrl || avatarUrl
+        avatarUrl: uploadedAvatarUrl || fallbackAvatar
       }))
       .then(() => {
         wx.showToast({ title: "资料已同步", icon: "success" });

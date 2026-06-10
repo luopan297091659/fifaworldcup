@@ -472,9 +472,11 @@ router.post("/profile/update", asyncRoute(async (req, res) => {
     if (nextName) {
       user.name = nextName;
       user.displayName = nextName;
+      user.nickName = nextName;
     }
     if (nextAvatarUrl) {
       user.avatarUrl = nextAvatarUrl;
+      user.avatar = nextAvatarUrl;
     }
     user.updatedAt = new Date().toISOString();
     return { user };
