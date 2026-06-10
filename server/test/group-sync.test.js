@@ -50,6 +50,30 @@ test('system groups should expose synced member roster for chat', async () => {
   }
 });
 
+test('room listings should support since-based live sync polling', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const user = await login(base, `room-sync-${Date.now()}`);
+    const since = new Date(Date.now() + 60 * 1000).toISOString();
+
+    const rooms = await request(base, `/worldcup/rooms?since=${encodeURIComponent(since)}`, {
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${user.token}`
+      }
+    });
+
+    assert.deepEqual(rooms.rooms, [], 'expected since-based polling to return only updated rooms');
+  } finally {
+    server.close();
+  }
+});
+
 test('room messages should be persisted and visible to members', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

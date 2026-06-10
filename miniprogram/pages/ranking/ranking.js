@@ -5,9 +5,7 @@ Page({
     activeTab: "friends",
     tabs: [
       { key: "friends", label: "好友" },
-      { key: "global", label: "全球" },
-      { key: "company", label: "公司" },
-      { key: "student", label: "留学生" }
+      { key: "global", label: "全球" }
     ],
     me: {},
     players: []

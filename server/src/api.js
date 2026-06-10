@@ -326,7 +326,23 @@ router.get("/rooms", asyncRoute(async (req, res) => {
   const me = buildMe(data, await userFor(req));
   const rawRoomId = typeof req.query.roomId === "string" ? req.query.roomId.trim() : "";
   const requestedRoomId = rawRoomId && rawRoomId !== "undefined" ? rawRoomId : "";
-  res.json(ok({ rooms: roomsWithUser(data, me, { requestedRoomId }) }));
+  const sinceValue = typeof req.query.since === "string" ? req.query.since.trim() : "";
+  const rooms = roomsWithUser(data, me, { requestedRoomId });
+
+  if (!sinceValue) {
+    res.json(ok({ rooms }));
+    return;
+  }
+
+  const sinceTime = Date.parse(sinceValue);
+  const filteredRooms = Number.isFinite(sinceTime)
+    ? rooms.filter((room) => {
+        const updatedAt = room.updatedAt ? Date.parse(room.updatedAt) : Number.NaN;
+        return Number.isFinite(updatedAt) && updatedAt > sinceTime;
+      })
+    : rooms;
+
+  res.json(ok({ rooms: filteredRooms }));
 }));
 
 router.post("/rooms/create", asyncRoute(async (req, res) => {

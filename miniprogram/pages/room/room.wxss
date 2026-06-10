@@ -88,7 +88,7 @@
 }
 
 .room-card {
-  padding: 26rpx;
+  padding: 22rpx;
   overflow: hidden;
 }
 
@@ -282,7 +282,7 @@
 
 .highlight-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180rpx, 1fr));
   gap: 12rpx;
   margin-top: 22rpx;
 }
@@ -364,37 +364,39 @@
 }
 
 .room-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10rpx;
+  align-items: stretch;
   margin-top: 24rpx;
 }
 
 .room-actions button {
+  width: 100%;
   min-width: 0;
+  min-height: 78rpx;
+  height: auto;
+  padding: 10rpx 12rpx;
+  border-radius: 14rpx;
+  line-height: 1.2;
+  white-space: normal;
+  box-shadow: none;
+}
+
+.room-actions .ghost-btn,
+.room-actions .primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #17212b;
+  border: 2rpx solid #d8dee5;
+}
+
+.room-actions .primary-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f6fcfb 100%);
 }
 
 .joined-actions {
-  justify-content: space-between;
-}
-
-.cheer-btn,
-.join-btn,
-.share-btn {
-  flex: 1 1 180rpx;
-  min-width: 0;
-  height: auto;
-  min-height: 78rpx;
-  padding: 10rpx 12rpx;
-  line-height: 1.2;
-  white-space: normal;
-}
-
-.join-btn,
-.share-btn {
-  flex-basis: 220rpx;
-}
-
-.cheer-btn {
-  flex-basis: 150rpx;
+  justify-items: stretch;
 }

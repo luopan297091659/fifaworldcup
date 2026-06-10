@@ -56,11 +56,6 @@
         <text>{{item.topic || '可邀请成员或直接进入，小组内支持实时讨论。'}}</text>
       </view>
 
-      <view class="group-feed" wx:if="{{item.feedMessages && item.feedMessages.length}}">
-        <text class="topic-label">群内赛况</text>
-        <view class="feed-item" wx:for="{{item.feedMessages}}" wx:key="*this">{{item}}</view>
-      </view>
-
       <view class="heat">
         <view class="heat-head">
           <text>房间热度</text>

@@ -216,8 +216,23 @@ Page({
     });
   },
 
+  isSystemRoom(room = {}) {
+    const type = String(room.type || "").toLowerCase();
+    const name = String(room.name || "").trim();
+    return Boolean(
+      room.isSystem
+      || room.ownerId === "system"
+      || room.ownerId === "admin"
+      || type === "系统群"
+      || type === "system"
+      || name === "小组积分群"
+      || name === "冠军押注群"
+    );
+  },
+
   decorateRooms(rooms) {
-    const decorated = (rooms || []).map((room) => ({
+    const filteredRooms = (rooms || []).filter((room) => !this.isSystemRoom(room));
+    const decorated = filteredRooms.map((room) => ({
       ...room,
       actionLoading: this.data.actionRoomId === room.id,
       highlights: buildRoomHighlights(room)

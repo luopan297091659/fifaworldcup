@@ -5,30 +5,7 @@
       <text class="muted">{{room && room.members ? room.members : members.length}} 人在线 · 群内讨论</text>
       <text class="subtip">成员信息可见，讨论内容可直接发送</text>
     </view>
-    <view class="chat-badge">微信风格</view>
-  </view>
-
-  <view class="quick-row">
-    <button class="quick-pill" wx:for="{{quickPhrases}}" wx:key="index" data-text="{{item}}" bindtap="insertQuickText">{{item}}</button>
-  </view>
-
-  <view class="card member-card">
-    <view class="section-head">
-      <text class="section-title">群成员</text>
-      <text class="muted">{{members.length || 0}} 人可见</text>
-    </view>
-    <view class="member-strip" wx:if="{{members.length}}">
-      <view class="member-chip" wx:for="{{members}}" wx:key="id">
-        <view class="member-avatar">{{item.name && item.name.slice(0,1)}}</view>
-        <view class="member-chip-copy">
-          <text class="member-chip-name">{{item.name}}</text>
-          <text class="member-chip-sub">{{item.score || 0}} 分 · {{item.id === (room && room.ownerId) ? '群主' : '成员'}}</text>
-        </view>
-      </view>
-    </view>
-    <view class="card empty-card" wx:else>
-      <text>暂无成员信息</text>
-    </view>
+    <!-- <view class="chat-badge">微信风格</view> -->
   </view>
 
   <view class="card chat-card">
@@ -64,7 +41,17 @@
       bindconfirm="onTextareaConfirm"
     />
     <view class="input-actions">
+      <button class="ghost-btn quick-toggle-btn" bindtap="toggleQuickPhrases">{{showQuickPhrases ? '收起快捷语' : '快捷语'}}</button>
+      <button class="ghost-btn emoji-btn" bindtap="toggleEmojiPicker">{{showEmojiPicker ? '收起表情' : '表情'}}</button>
       <button class="primary-btn send-btn" bindtap="sendMessage">发送</button>
+    </view>
+    <view class="quick-row compact" wx:if="{{showQuickPhrases}}">
+      <button class="quick-pill" wx:for="{{quickPhrases}}" wx:key="index" data-text="{{item}}" bindtap="insertQuickText">{{item}}</button>
+    </view>
+    <view class="emoji-picker" wx:if="{{showEmojiPicker}}">
+      <view class="emoji-grid">
+        <button class="emoji-chip" wx:for="{{emojiList}}" wx:key="*this" data-emoji="{{item}}" bindtap="insertEmoji">{{item}}</button>
+      </view>
     </view>
   </view>
 </view>

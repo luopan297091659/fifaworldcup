@@ -43,6 +43,13 @@
     <button class="link-btn" bindtap="handleLogout">退出</button>
   </view>
 
+  <view class="card" style="padding: 18rpx 16rpx; margin-top: 18rpx;">
+    <text class="section-title" style="margin: 0 0 8rpx; font-size: 30rpx;">积分规则</text>
+    <text class="muted" style="display:block; line-height:1.5;">1. 每场比赛预测正确可获得 3 分；预测错误不加分。
+2. 结果公布后，积分会自动更新到排行榜中。
+3. 预测越多，积分越能反映你的整体命中表现。</text>
+  </view>
+
   <view class="stats">
     <view class="card stat">
       <text class="stat-value">{{me.score}}</text>
