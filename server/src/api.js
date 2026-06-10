@@ -300,7 +300,8 @@ router.post("/predictions/submit", asyncRoute(async (req, res) => {
 router.get("/rooms", asyncRoute(async (req, res) => {
   const data = await readStore();
   const me = buildMe(data, await userFor(req));
-  const requestedRoomId = typeof req.query.roomId === "string" ? req.query.roomId.trim() : "";
+  const rawRoomId = typeof req.query.roomId === "string" ? req.query.roomId.trim() : "";
+  const requestedRoomId = rawRoomId && rawRoomId !== "undefined" ? rawRoomId : "";
   res.json(ok({ rooms: roomsWithUser(data, me, { requestedRoomId }) }));
 }));
 

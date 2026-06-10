@@ -156,6 +156,15 @@ function normalizeRemoteResponse(response) {
   return body.data || body;
 }
 
+function sanitizeRequestPayload(data = {}) {
+  return Object.entries(data || {}).reduce((result, [key, value]) => {
+    if (value !== undefined && value !== null) {
+      result[key] = value;
+    }
+    return result;
+  }, {});
+}
+
 function request(endpointKey, data = {}, method = "POST") {
   const endpoint = config.endpoints[endpointKey];
   if (!config.baseUrl || !endpoint) {
@@ -168,10 +177,10 @@ function request(endpointKey, data = {}, method = "POST") {
       url: `${config.baseUrl}${endpoint}`,
       method,
       timeout: config.timeout,
-      data: {
+      data: sanitizeRequestPayload({
         appKey: config.appKey,
         ...data
-      },
+      }),
       header: {
         "content-type": "application/json",
         "X-App-Key": config.appKey,
@@ -214,10 +223,10 @@ function upload(endpointKey, filePath, formData = {}) {
       filePath,
       name: "file",
       timeout: config.timeout,
-      formData: {
+      formData: sanitizeRequestPayload({
         appKey: config.appKey,
         ...formData
-      },
+      }),
       header: {
         "X-App-Key": config.appKey,
         Authorization: token ? `Bearer ${token}` : ""
@@ -366,7 +375,7 @@ function submitPrediction(payload) {
 }
 
 function getRooms(options = {}) {
-  return request("rooms", options, "GET");
+  return request("rooms", sanitizeRequestPayload(options), "GET");
 }
 
 function createRoom(payload) {
@@ -415,5 +424,6 @@ module.exports = {
   joinRoom,
   cheerRoom,
   getRanking,
-  getProfile
+  getProfile,
+  sanitizeRequestPayload
 };
