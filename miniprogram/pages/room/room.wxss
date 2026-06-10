@@ -170,6 +170,90 @@
   font-weight: 900;
 }
 
+.group-feed {
+  margin-top: 16rpx;
+  padding: 14rpx;
+  border-radius: 12rpx;
+  background: #f4f7fb;
+}
+
+.group-feed .feed-item {
+  margin-top: 6rpx;
+  color: #2f4054;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.discussion-box {
+  margin-top: 18rpx;
+  padding: 14rpx;
+  border: 2rpx solid #edf2f6;
+  border-radius: 14rpx;
+  background: #fafcff;
+}
+
+.emoji-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin: 10rpx 0 12rpx;
+}
+
+.emoji-chip {
+  min-width: 56rpx;
+  min-height: 56rpx;
+  padding: 0 10rpx;
+  border: 2rpx solid #d7dee5;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #17212b;
+  font-size: 28rpx;
+}
+
+.discussion-input {
+  width: 100%;
+  min-height: 88rpx;
+  padding: 12rpx 14rpx;
+  border: 2rpx solid #dfe5eb;
+  border-radius: 12rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+  font-size: 26rpx;
+}
+
+.discussion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.discussion-actions button {
+  flex: 1 1 180rpx;
+}
+
+.discussion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.discussion-item {
+  padding: 10rpx 12rpx;
+  border-radius: 10rpx;
+  background: #ffffff;
+  border: 2rpx solid #edf2f6;
+}
+
+.discussion-time {
+  display: block;
+  color: #0b7a75;
+  font-size: 22rpx;
+  font-weight: 800;
+  margin-bottom: 4rpx;
+}
+
 .heat {
   margin-top: 20rpx;
 }

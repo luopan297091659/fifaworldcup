@@ -202,6 +202,20 @@ Page({
       });
   },
 
+  openChat(event) {
+    const roomId = event.currentTarget.dataset.id;
+    const roomName = event.currentTarget.dataset.name || "房间讨论";
+
+    if (!roomId) {
+      wx.showToast({ title: "房间信息异常", icon: "none" });
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/chat/chat?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
+    });
+  },
+
   decorateRooms(rooms) {
     const decorated = (rooms || []).map((room) => ({
       ...room,

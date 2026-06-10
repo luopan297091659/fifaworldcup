@@ -23,8 +23,49 @@ function cloneSeed() {
   return JSON.parse(JSON.stringify(seed));
 }
 
+function ensureSystemRooms(data, base) {
+  const rooms = Array.isArray(data.rooms) ? [...data.rooms] : Array.isArray(base.rooms) ? [...base.rooms] : [];
+  const roomById = new Map(rooms.map((room) => [room.id, room]));
+  const groups = Array.isArray(data.groups) && data.groups.length ? data.groups : base.groups || [];
+
+  groups.forEach((group) => {
+    const existing = roomById.get(group.id) || {
+      id: group.id,
+      name: group.name,
+      type: "系统群",
+      topic: group.description || "",
+      members: Number(group.memberCount || 0),
+      heat: Number(group.heat || 0),
+      cheers: 0,
+      ownerId: "system",
+      players: [],
+      isPublic: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    existing.id = group.id;
+    existing.name = group.name || existing.name;
+    existing.type = existing.type || "系统群";
+    existing.isPublic = typeof existing.isPublic === "boolean" ? existing.isPublic : true;
+    existing.topic = existing.topic || group.description || "系统群，实时同步战报与讨论。";
+    existing.members = Math.max(Number(existing.members || 0), Number(group.memberCount || 0));
+    existing.heat = Number(existing.heat || group.heat || 0);
+    existing.feedMessages = Array.isArray(group.feedMessages) ? group.feedMessages.slice() : (existing.feedMessages || []);
+    existing.shareText = existing.shareText || group.shareText || "";
+    existing.ownerId = existing.ownerId || "system";
+    existing.players = Array.isArray(existing.players) ? existing.players : [];
+
+    roomById.set(group.id, existing);
+  });
+
+  return Array.from(roomById.values());
+}
+
 function normalizeStoreData(data = {}) {
   const base = cloneSeed();
+  const rooms = ensureSystemRooms(data, base);
+
   return {
     ...base,
     ...data,
@@ -32,7 +73,7 @@ function normalizeStoreData(data = {}) {
     sessions: isObject(data.sessions) ? data.sessions : {},
     predictions: isObject(data.predictions) ? data.predictions : {},
     matches: Array.isArray(data.matches) ? data.matches : base.matches,
-    rooms: Array.isArray(data.rooms) ? data.rooms : base.rooms,
+    rooms,
     rankingPlayers: Array.isArray(data.rankingPlayers) ? data.rankingPlayers : base.rankingPlayers,
     members: Array.isArray(data.members) ? data.members : base.members,
     groups: Array.isArray(data.groups) ? data.groups : base.groups,

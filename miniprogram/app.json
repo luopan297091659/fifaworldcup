@@ -3,6 +3,7 @@
     "pages/home/home",
     "pages/predict/predict",
     "pages/room/room",
+    "pages/chat/chat",
     "pages/ranking/ranking",
     "pages/result/result",
     "pages/profile/profile"

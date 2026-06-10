@@ -1,0 +1,71 @@
+<view class="page chat-page">
+  <view class="chat-header card">
+    <view class="chat-head-copy">
+      <text class="chat-title">{{roomName}}</text>
+      <text class="muted">{{room && room.members ? room.members : members.length}} 人在线 · 群内讨论</text>
+      <text class="subtip">成员信息可见，讨论内容可直接发送</text>
+    </view>
+    <view class="chat-badge">微信风格</view>
+  </view>
+
+  <view class="quick-row">
+    <button class="quick-pill" wx:for="{{quickPhrases}}" wx:key="index" data-text="{{item}}" bindtap="insertQuickText">{{item}}</button>
+  </view>
+
+  <view class="card member-card">
+    <view class="section-head">
+      <text class="section-title">群成员</text>
+      <text class="muted">{{members.length || 0}} 人可见</text>
+    </view>
+    <view class="member-strip" wx:if="{{members.length}}">
+      <view class="member-chip" wx:for="{{members}}" wx:key="id">
+        <view class="member-avatar">{{item.name && item.name.slice(0,1)}}</view>
+        <view class="member-chip-copy">
+          <text class="member-chip-name">{{item.name}}</text>
+          <text class="member-chip-sub">{{item.score || 0}} 分 · {{item.id === (room && room.ownerId) ? '群主' : '成员'}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="card empty-card" wx:else>
+      <text>暂无成员信息</text>
+    </view>
+  </view>
+
+  <view class="card chat-card">
+    <view class="section-head">
+      <text class="section-title">群内讨论</text>
+      <text class="muted">实时交流 · 支持快捷回复</text>
+    </view>
+
+    <view class="message-list">
+      <view class="message-item {{item.type === 'me' ? 'mine' : ''}}" wx:for="{{messages}}" wx:key="id">
+        <view class="message-meta">
+          <text class="message-author">{{item.sender || (item.type === 'me' ? '我' : '群消息')}}</text>
+          <text class="message-time">{{item.time}}</text>
+        </view>
+        <text class="message-text">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="chat-input-wrap card">
+    <view class="input-hint-row">
+      <text class="muted">回车即可发送，支持表情与赛况分享</text>
+      <text class="hint-pill">{{draft.length || 0}}/120</text>
+    </view>
+    <textarea
+      class="chat-input"
+      value="{{draft}}"
+      placeholder="输入讨论内容，支持表情与赛况分享"
+      maxlength="120"
+      auto-height
+      confirm-type="send"
+      bindinput="onDraftInput"
+      bindconfirm="onTextareaConfirm"
+    />
+    <view class="input-actions">
+      <button class="ghost-btn" bindtap="insertQuickText" data-text="👍 这场值得看">👍 快捷语</button>
+      <button class="primary-btn send-btn" bindtap="sendMessage">发送</button>
+    </view>
+  </view>
+</view>

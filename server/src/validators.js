@@ -30,7 +30,7 @@ function validateMatchId(value) {
 
 function validateRoomId(value) {
   const roomId = asString(value);
-  if (!/^r[\w-]{1,32}$/.test(roomId)) {
+  if (!/^(?:r[\w-]{1,32}|group-[\w-]{1,32})$/.test(roomId)) {
     throw badRequest("Invalid roomId");
   }
   return roomId;

@@ -53,7 +53,12 @@
 
       <view class="topic">
         <text class="topic-label">群话题</text>
-        <text>{{item.topic}}</text>
+        <text>{{item.topic || '可邀请成员或直接进入，小组内支持实时讨论。'}}</text>
+      </view>
+
+      <view class="group-feed" wx:if="{{item.feedMessages && item.feedMessages.length}}">
+        <text class="topic-label">群内赛况</text>
+        <view class="feed-item" wx:for="{{item.feedMessages}}" wx:key="*this">{{item}}</view>
       </view>
 
       <view class="heat">
@@ -91,7 +96,8 @@
           bindtap="joinRoom"
           data-id="{{item.id}}"
         >加入小组</button>
-        <button class="primary-btn share-btn" open-type="share" data-id="{{item.id}}" data-room="{{item.name}}">邀请群友一起看</button>
+        <button class="primary-btn share-btn" bindtap="openChat" data-id="{{item.id}}" data-name="{{item.name}}">进入群内讨论</button>
+        <button class="ghost-btn share-btn" open-type="share" data-id="{{item.id}}" data-room="{{item.name}}">邀请成员</button>
       </view>
     </view>
   </view>

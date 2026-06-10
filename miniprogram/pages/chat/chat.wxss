@@ -1,0 +1,244 @@
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.chat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 14rpx 14rpx 12rpx;
+  border-radius: 18rpx;
+}
+
+.chat-badge {
+  padding: 8rpx 12rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #0b7a75, #2a9d8f);
+  color: #ffffff;
+  font-size: 22rpx;
+  font-weight: 900;
+  box-shadow: 0 8rpx 16rpx rgba(11, 122, 117, 0.16);
+}
+
+.subtip {
+  color: #0b7a75;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.quick-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56rpx;
+  padding: 0 14rpx;
+  border: 2rpx solid #dbe7f0;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 24rpx;
+  line-height: 1.2;
+}
+
+.chat-head-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.chat-title {
+  color: #17212b;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.section-title {
+  color: #17212b;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.member-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  max-width: 100%;
+  padding: 8rpx 10rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+  border: 2rpx solid #edf2f6;
+  box-shadow: 0 4rpx 10rpx rgba(15, 23, 42, 0.04);
+}
+
+.member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0b7a75, #2a9d8f);
+  color: #ffffff;
+  font-size: 22rpx;
+  font-weight: 900;
+}
+
+.member-chip-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.member-chip-name {
+  max-width: 180rpx;
+  color: #17212b;
+  font-size: 24rpx;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-chip-sub {
+  color: #68717d;
+  font-size: 20rpx;
+  line-height: 1.2;
+}
+
+.chat-card {
+  min-height: 420rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f9fc 100%);
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.message-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6rpx;
+  max-width: 82%;
+  padding: 12rpx 14rpx;
+  border-radius: 18rpx 18rpx 18rpx 6rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #edf4fb 100%);
+  box-shadow: 0 6rpx 14rpx rgba(15, 23, 42, 0.08);
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.message-author {
+  color: #0b7a75;
+  font-size: 20rpx;
+  font-weight: 900;
+}
+
+.message-item.mine {
+  align-self: flex-end;
+  align-items: flex-end;
+  border-radius: 18rpx 18rpx 6rpx 18rpx;
+  background: linear-gradient(180deg, #e9fff9 0%, #dff4ee 100%);
+}
+
+.message-time {
+  color: #64748b;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.message-text {
+  color: #17212b;
+  font-size: 26rpx;
+  line-height: 1.45;
+}
+
+.chat-input-wrap {
+  position: sticky;
+  bottom: 8rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  padding: 12rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12rpx 26rpx rgba(15, 23, 42, 0.12);
+}
+
+.input-hint-row,
+.input-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10rpx;
+}
+
+.hint-pill {
+  color: #0b7a75;
+  font-size: 20rpx;
+  font-weight: 900;
+}
+
+.chat-input {
+  width: 100%;
+  min-height: 92rpx;
+  padding: 12rpx 14rpx;
+  border: 2rpx solid #dfe5eb;
+  border-radius: 16rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  box-sizing: border-box;
+  font-size: 28rpx;
+}
+
+.input-actions .ghost-btn,
+.input-actions .send-btn {
+  width: auto;
+  min-height: 64rpx;
+  margin: 0;
+  border-radius: 14rpx;
+  line-height: 64rpx;
+}
+
+.ghost-btn {
+  padding: 0 14rpx;
+  border: 2rpx solid #dbe7f0;
+  background: #ffffff;
+  color: #17212b;
+  font-size: 24rpx;
+}
+
+.send-btn {
+  flex: 1;
+  max-width: 180rpx;
+  border-radius: 14rpx;
+  box-shadow: 0 8rpx 16rpx rgba(11, 122, 117, 0.18);
+}

@@ -45,10 +45,18 @@ async function main() {
         confidence: 70
       })
     });
+
+    const roomsResponse = await request(base, "/worldcup/rooms", { headers: authHeaders });
+    const roomId = roomsResponse.rooms.find((room) => room.id === "group-1")?.id || roomsResponse.rooms[0]?.id;
+
+    if (!roomId) {
+      throw new Error("Expected at least one room to be available for smoke testing");
+    }
+
     await request(base, "/worldcup/rooms/cheer", {
       method: "POST",
       headers: authHeaders,
-      body: JSON.stringify({ roomId: "r1" })
+      body: JSON.stringify({ roomId })
     });
     await request(base, "/worldcup/rankings?scope=friends", { headers: authHeaders });
 
