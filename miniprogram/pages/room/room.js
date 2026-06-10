@@ -6,7 +6,10 @@ Page({
     rooms: [],
     loading: false,
     actionRoomId: "",
-    invitedRoomId: ""
+    invitedRoomId: "",
+    showCreateModal: false,
+    createName: "",
+    createIsPublic: false
   },
 
   onLoad(options = {}) {
@@ -61,30 +64,44 @@ Page({
 
   createRoom() {
     this.requireLogin()
-      .then(() => this.promptRoomName("创建小组"))
-      .then((name) => {
-        if (!name) return null;
-        return new Promise((resolve) => {
-          wx.showActionSheet({
-            itemList: ["公开小组", "私密小组"],
-            success: (res) => resolve({
-              name,
-              type: res.tapIndex === 1 ? "私密" : "公开",
-              isPublic: res.tapIndex !== 1
-            }),
-            fail: () => resolve(null)
-          });
+      .then(() => {
+        this.setData({
+          showCreateModal: true,
+          createName: "",
+          createIsPublic: false
         });
       })
-      .then((payload) => {
-        if (!payload) return null;
-        return api.createRoom({
-          name: payload.name,
-          type: payload.type,
-          isPublic: payload.isPublic,
-          topic: "一起预测世界杯赛果"
-        });
-      })
+      .catch((error) => {
+        console.error("创建小组前置校验错误:", error);
+      });
+  },
+
+  closeCreateModal() {
+    this.setData({ showCreateModal: false });
+  },
+
+  onCreateNameInput(event) {
+    this.setData({ createName: event.detail.value || "" });
+  },
+
+  onToggleCreatePublic(event) {
+    this.setData({ createIsPublic: Boolean(event.detail.value) });
+  },
+
+  confirmCreateRoom() {
+    const name = (this.data.createName || "").trim();
+    if (!name) {
+      wx.showToast({ title: "请输入小组名称", icon: "none" });
+      return;
+    }
+
+    this.setData({ showCreateModal: false });
+    api.createRoom({
+      name,
+      topic: "一起预测世界杯赛果",
+      type: this.data.createIsPublic ? "公开" : "私密",
+      isPublic: this.data.createIsPublic
+    })
       .then((result) => {
         if (!result) return;
         this.setData({ rooms: this.decorateRooms(result.rooms || []) });

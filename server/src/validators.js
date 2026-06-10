@@ -47,13 +47,16 @@ function validateRoomName(value) {
 function validateRoomPayload(body = {}) {
   const name = validateRoomName(body.name);
   const topic = asString(body.topic || "一起预测世界杯赛果").slice(0, 60);
-  const isPublic = body.isPublic === false ? false : true;
+  const explicitPublic = typeof body.isPublic === "boolean";
+  const isPublic = explicitPublic
+    ? Boolean(body.isPublic)
+    : asString(body.type || "").trim() === "公开";
   const type = asString(
     body.type || (isPublic ? "公开" : "私密"),
     isPublic ? "公开" : "私密"
   ).slice(0, 12);
 
-  return { name, topic, type, isPublic };
+  return { name, topic, type, isPublic: Boolean(isPublic) };
 }
 
 function validateResult(value) {

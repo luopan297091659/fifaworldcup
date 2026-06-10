@@ -124,12 +124,23 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
       : isMeaningfulName(safeUserInfo?.name)
         ? safeUserInfo.name.trim()
         : "";
+    const avatarUrl = typeof safeUserInfo?.avatarUrl === "string" && safeUserInfo.avatarUrl.trim()
+      ? safeUserInfo.avatarUrl.trim()
+      : typeof safeUserInfo?.avatar === "string" && safeUserInfo.avatar.trim()
+        ? safeUserInfo.avatar.trim()
+        : typeof existing?.avatarUrl === "string" && existing.avatarUrl.trim()
+          ? existing.avatarUrl.trim()
+          : typeof existing?.avatar === "string" && existing.avatar.trim()
+            ? existing.avatar.trim()
+            : "";
     const name = profileName || existing?.name || "我";
     const user = {
       id: userId,
       name,
+      nickName: profileName || existing?.nickName || name,
       displayName: profileName || existing?.displayName || name,
-      avatarUrl: safeUserInfo?.avatarUrl || existing?.avatarUrl || "",
+      avatarUrl,
+      avatar: avatarUrl,
       score: existing?.score || 0,
       aiWins: existing?.aiWins || 0,
       percentile: existing?.percentile || 0,

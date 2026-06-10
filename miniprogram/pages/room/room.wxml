@@ -8,6 +8,29 @@
     <button class="primary-btn create-btn" bindtap="createRoom">创建小组</button>
   </view>
 
+  <view class="create-modal-mask" wx:if="{{showCreateModal}}" bindtap="closeCreateModal"></view>
+  <view class="create-modal" wx:if="{{showCreateModal}}">
+    <text class="modal-title">创建小组</text>
+    <input
+      class="modal-input"
+      value="{{createName}}"
+      placeholder="输入小组名称"
+      maxlength="24"
+      bindinput="onCreateNameInput"
+    />
+    <view class="visibility-box">
+      <label class="visibility-label">
+        <checkbox checked="{{createIsPublic}}" bindchange="onToggleCreatePublic"></checkbox>
+        <text>公开小组</text>
+      </label>
+      <text class="muted">未勾选时默认为私密，未加入成员看不到该小组</text>
+    </view>
+    <view class="modal-actions">
+      <button class="ghost-btn" bindtap="closeCreateModal">取消</button>
+      <button class="primary-btn" bindtap="confirmCreateRoom">确认创建</button>
+    </view>
+  </view>
+
   <view class="room-list">
     <view class="card room-card" wx:for="{{rooms}}" wx:key="id">
       <view class="room-head">

@@ -29,6 +29,41 @@ async function getRooms(base, token) {
   });
 }
 
+test('new rooms default to private visibility when isPublic is not provided', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-default-${Date.now()}`);
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ name: `默认私密-${Date.now()}` })
+    });
+
+    assert.equal(created.room.isPublic, false, 'new room should default to private');
+    assert.equal(created.room.type, '私密', 'new room type should reflect private visibility');
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
 test('private rooms stay hidden from non-members but remain shareable via invite link', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

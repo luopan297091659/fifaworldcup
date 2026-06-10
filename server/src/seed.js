@@ -20,6 +20,30 @@ const matches = [
   }
 ];
 
+const members = [
+  { id: "member-1", name: "阿宁", role: "队长", groupId: "group-1", groupName: "冠军押注群", status: "在线" },
+  { id: "member-2", name: "小周", role: "助理", groupId: "group-1", groupName: "冠军押注群", status: "在线" },
+  { id: "member-3", name: "林悦", role: "分析员", groupId: "group-2", groupName: "小组积分群", status: "离线" }
+];
+
+const groups = [
+  { id: "group-1", name: "冠军押注群", description: "关注冠军、首球和小组积分", memberCount: 18, heat: 86, status: "活跃" },
+  { id: "group-2", name: "小组积分群", description: "同步小组赛结果和最新战报", memberCount: 12, heat: 64, status: "热度中" }
+];
+
+const latestMatches = matches.slice(0, 3).map((match) => ({
+  id: `latest-${match.id}`,
+  matchId: match.id,
+  home: match.home,
+  away: match.away,
+  group: match.group || "A组",
+  time: match.time,
+  venue: match.venue,
+  status: match.status,
+  kickoffAt: match.kickoffAt,
+  finalScore: match.finalScore || ""
+}));
+
 module.exports = {
   appKey: process.env.APP_KEY || "worldcup",
   tournament: {
@@ -35,5 +59,8 @@ module.exports = {
   predictions: {},
   matches,
   rooms: [],
-  rankingPlayers: []
+  rankingPlayers: [],
+  members,
+  groups,
+  latestMatches
 };

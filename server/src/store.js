@@ -34,6 +34,9 @@ function normalizeStoreData(data = {}) {
     matches: Array.isArray(data.matches) ? data.matches : base.matches,
     rooms: Array.isArray(data.rooms) ? data.rooms : base.rooms,
     rankingPlayers: Array.isArray(data.rankingPlayers) ? data.rankingPlayers : base.rankingPlayers,
+    members: Array.isArray(data.members) ? data.members : base.members,
+    groups: Array.isArray(data.groups) ? data.groups : base.groups,
+    latestMatches: Array.isArray(data.latestMatches) ? data.latestMatches : base.latestMatches,
     tournament: isObject(data.tournament) ? data.tournament : base.tournament,
     appKey: data.appKey || base.appKey
   };
@@ -91,6 +94,82 @@ async function ensureMysqlStore() {
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS worldcup_members (
+      id VARCHAR(64) NOT NULL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      role VARCHAR(100) DEFAULT '',
+      group_id VARCHAR(64) DEFAULT '',
+      group_name VARCHAR(120) DEFAULT '',
+      status VARCHAR(32) DEFAULT 'online',
+      avatar_url VARCHAR(255) DEFAULT '',
+      sort_order INT NOT NULL DEFAULT 0,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS worldcup_groups (
+      id VARCHAR(64) NOT NULL PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      description VARCHAR(255) DEFAULT '',
+      member_count INT NOT NULL DEFAULT 0,
+      heat INT NOT NULL DEFAULT 0,
+      status VARCHAR(32) DEFAULT 'active',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS worldcup_latest_matches (
+      id VARCHAR(64) NOT NULL PRIMARY KEY,
+      match_id VARCHAR(64) NOT NULL,
+      home VARCHAR(120) NOT NULL,
+      away VARCHAR(120) NOT NULL,
+      group_name VARCHAR(64) DEFAULT '',
+      time VARCHAR(64) DEFAULT '',
+      venue VARCHAR(160) DEFAULT '',
+      status VARCHAR(32) DEFAULT 'open',
+      final_score VARCHAR(16) DEFAULT '',
+      kickoff_at VARCHAR(64) DEFAULT '',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+
+  const base = cloneSeed();
+  const [memberRows] = await pool.execute("SELECT COUNT(*) AS cnt FROM worldcup_members");
+  if (!memberRows[0].cnt) {
+    for (const member of base.members || []) {
+      await pool.execute(
+        "INSERT INTO worldcup_members (id, name, role, group_id, group_name, status, avatar_url, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [member.id, member.name, member.role || "", member.groupId || "", member.groupName || "", member.status || "online", member.avatarUrl || "", member.sortOrder || 0]
+      );
+    }
+  }
+
+  const [groupRows] = await pool.execute("SELECT COUNT(*) AS cnt FROM worldcup_groups");
+  if (!groupRows[0].cnt) {
+    for (const group of base.groups || []) {
+      await pool.execute(
+        "INSERT INTO worldcup_groups (id, name, description, member_count, heat, status) VALUES (?, ?, ?, ?, ?, ?)",
+        [group.id, group.name, group.description || "", Number(group.memberCount || 0), Number(group.heat || 0), group.status || "active"]
+      );
+    }
+  }
+
+  const [latestRows] = await pool.execute("SELECT COUNT(*) AS cnt FROM worldcup_latest_matches");
+  if (!latestRows[0].cnt) {
+    for (const item of base.latestMatches || []) {
+      await pool.execute(
+        "INSERT INTO worldcup_latest_matches (id, match_id, home, away, group_name, time, venue, status, final_score, kickoff_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [item.id, item.matchId || item.id, item.home || "", item.away || "", item.group || "", item.time || "", item.venue || "", item.status || "open", item.finalScore || "", item.kickoffAt || ""]
+      );
+    }
+  }
 
   const [rows] = await pool.execute("SELECT id FROM worldcup_app_state WHERE id = ?", ["main"]);
   if (!rows.length) {

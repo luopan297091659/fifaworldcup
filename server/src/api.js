@@ -228,6 +228,9 @@ router.get("/home", asyncRoute(async (req, res) => {
     topRoom: rooms[0] || null,
     myRoomRank: rooms[0] ? rooms[0].players.findIndex((player) => player.id === me.id) + 1 : 0,
     predictions: predictionMap(predictions),
+    members: Array.isArray(data.members) ? data.members : [],
+    groups: Array.isArray(data.groups) ? data.groups : [],
+    latestMatches: Array.isArray(data.latestMatches) ? data.latestMatches : (Array.isArray(data.matches) ? data.matches.slice(0, 3) : []),
     opening: tournamentInfo(data, req)
   }));
 }));

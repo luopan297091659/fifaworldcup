@@ -4,6 +4,9 @@ Page({
   data: {
     me: {},
     matches: [],
+    members: [],
+    groups: [],
+    latestMatches: [],
     topRoom: null,
     myRoomRank: 0,
     opening: {},
@@ -43,6 +46,10 @@ Page({
           ? homeData.myRoomRank
           : this.getMyRoomRank(topRoom, homeData.me.id);
 
+        const latestMatches = Array.isArray(homeData.latestMatches) && homeData.latestMatches.length
+          ? homeData.latestMatches
+          : (Array.isArray(homeData.matches) ? homeData.matches.slice(0, 3) : []);
+
         this.setData({
           me: homeData.me,
           matches: homeData.matches.map((match) => ({
@@ -52,6 +59,9 @@ Page({
               ? `AI：${match.aiPick} ${match.aiScore}`
               : "提交后显示 AI 参考"
           })),
+          members: Array.isArray(homeData.members) ? homeData.members : [],
+          groups: Array.isArray(homeData.groups) ? homeData.groups : [],
+          latestMatches,
           topRoom,
           myRoomRank,
           opening: homeData.opening || {},

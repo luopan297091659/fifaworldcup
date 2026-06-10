@@ -97,8 +97,10 @@ function normalizeWechatUserInfo(userInfo) {
 
   const nickName = isMeaningfulNickName(userInfo.nickName)
     ? userInfo.nickName.trim()
-    : "";
-  const avatarUrl = normalizeAvatarUrl(userInfo.avatarUrl);
+    : isMeaningfulNickName(userInfo.name)
+      ? userInfo.name.trim()
+      : "";
+  const avatarUrl = normalizeAvatarUrl(userInfo.avatarUrl || userInfo.avatar || "");
 
   if (!nickName && !avatarUrl) return null;
   return {
@@ -114,9 +116,11 @@ function mergeUserWithWeChatInfo(user, userInfo) {
 
   const nickName = isMeaningfulNickName(userInfo.nickName)
     ? userInfo.nickName.trim()
-    : user.nickName || user.name || user.displayName || "我";
+    : isMeaningfulNickName(userInfo.name)
+      ? userInfo.name.trim()
+      : user.nickName || user.name || user.displayName || "我";
   const name = nickName;
-  const avatar = normalizeAvatarUrl(userInfo.avatarUrl || user.avatarUrl || user.avatar || "");
+  const avatar = normalizeAvatarUrl(userInfo.avatarUrl || userInfo.avatar || user.avatarUrl || user.avatar || "");
 
   return {
     ...user,

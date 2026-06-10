@@ -2,6 +2,80 @@
   margin-top: 24rpx;
 }
 
+.create-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: rgba(7, 12, 18, 0.45);
+}
+
+.create-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 10;
+  width: 92vw;
+  max-width: 640rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 18rpx 42rpx rgba(7, 12, 18, 0.25);
+  transform: translate(-50%, -50%);
+}
+
+.modal-title {
+  display: block;
+  margin-bottom: 18rpx;
+  color: #17212b;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.modal-input {
+  width: 100%;
+  min-height: 80rpx;
+  padding: 0 18rpx;
+  border: 2rpx solid #dfe5eb;
+  border-radius: 14rpx;
+  background: #f7f9fb;
+  box-sizing: border-box;
+}
+
+.visibility-box {
+  margin-top: 18rpx;
+  padding: 14rpx 12rpx;
+  border: 2rpx solid #edf2f6;
+  border-radius: 14rpx;
+  background: #f7f9fb;
+}
+
+.visibility-label {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  color: #17212b;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.visibility-box .muted {
+  display: block;
+  margin-top: 8rpx;
+  color: #68717d;
+  font-size: 22rpx;
+  line-height: 1.4;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 22rpx;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
 .create-btn {
   width: 100%;
 }

@@ -65,6 +65,65 @@
     <text>暂无线上比赛数据</text>
   </view>
 
+  <view class="section-title">成员信息</view>
+  <view class="match-list" wx:if="{{members.length}}">
+    <view class="card match-card" wx:for="{{members}}" wx:key="id">
+      <view class="match-head">
+        <text class="tag">{{item.role || '成员'}}</text>
+        <text class="muted">{{item.status || '在线'}}</text>
+      </view>
+      <view class="teams">
+        <text>{{item.name}}</text>
+        <text class="muted">{{item.groupName || item.groupId || '球队关注者'}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="card empty-card" wx:else>
+    <text>暂无成员信息</text>
+  </view>
+
+  <view class="section-title">小组信息</view>
+  <view class="match-list" wx:if="{{groups.length}}">
+    <view class="card match-card" wx:for="{{groups}}" wx:key="id">
+      <view class="match-head">
+        <text class="tag">{{item.status || '活跃'}}</text>
+        <text class="muted">{{item.memberCount || 0}} 人</text>
+      </view>
+      <view class="teams">
+        <text>{{item.name}}</text>
+        <text class="muted">{{item.description || '同步小组动态'}}</text>
+      </view>
+      <view class="match-foot">
+        <text class="muted">热度 {{item.heat || 0}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="card empty-card" wx:else>
+    <text>暂无小组信息</text>
+  </view>
+
+  <view class="section-title">最新比赛</view>
+  <view class="match-list" wx:if="{{latestMatches.length}}">
+    <view class="card match-card" wx:for="{{latestMatches}}" wx:key="id">
+      <view class="match-head">
+        <text class="tag">{{item.group || '最新比赛'}}</text>
+        <text class="muted">{{item.time || '即将开赛'}}</text>
+      </view>
+      <view class="teams">
+        <text>{{item.home}}</text>
+        <text class="versus">VS</text>
+        <text>{{item.away}}</text>
+      </view>
+      <view class="match-foot">
+        <text class="muted">{{item.venue || '赛事场馆'}}</text>
+        <text class="status">{{item.status === 'closed' ? '已公布' : '待开赛'}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="card empty-card" wx:else>
+    <text>暂无最新比赛信息</text>
+  </view>
+
   <view class="section-title">好友小组</view>
   <view class="card room-preview" wx:if="{{topRoom}}" bindtap="goRoom">
     <view>
