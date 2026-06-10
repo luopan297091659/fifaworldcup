@@ -19,7 +19,7 @@ Page({
 
   loadRooms() {
     this.setData({ loading: true });
-    api.getRooms()
+    api.getRooms({ roomId: this.data.invitedRoomId || undefined })
       .then(({ rooms }) => {
         this.setData({ rooms: this.decorateRooms(rooms || []) });
       })
@@ -64,7 +64,26 @@ Page({
       .then(() => this.promptRoomName("创建小组"))
       .then((name) => {
         if (!name) return null;
-        return api.createRoom({ name });
+        return new Promise((resolve) => {
+          wx.showActionSheet({
+            itemList: ["公开小组", "私密小组"],
+            success: (res) => resolve({
+              name,
+              type: res.tapIndex === 1 ? "私密" : "公开",
+              isPublic: res.tapIndex !== 1
+            }),
+            fail: () => resolve(null)
+          });
+        });
+      })
+      .then((payload) => {
+        if (!payload) return null;
+        return api.createRoom({
+          name: payload.name,
+          type: payload.type,
+          isPublic: payload.isPublic,
+          topic: "一起预测世界杯赛果"
+        });
       })
       .then((result) => {
         if (!result) return;

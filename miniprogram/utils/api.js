@@ -361,8 +361,8 @@ function submitPrediction(payload) {
   return request("submitPrediction", payload);
 }
 
-function getRooms() {
-  return request("rooms", {}, "GET");
+function getRooms(options = {}) {
+  return request("rooms", options, "GET");
 }
 
 function createRoom(payload) {

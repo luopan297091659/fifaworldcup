@@ -13,7 +13,7 @@
       <view class="room-head">
         <view>
           <text class="room-name">{{item.name}}</text>
-          <text class="muted">{{item.type}} · {{item.members}} 人 · {{item.joined ? "已加入" : "未加入"}}</text>
+          <text class="muted">{{item.type || (item.isPublic ? "公开" : "私密")}} · {{item.members}} 人 · {{item.joined ? "已加入" : "未加入"}}</text>
         </view>
         <view wx:if="{{item.canManage}}" class="manage-actions">
           <button

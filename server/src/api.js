@@ -127,19 +127,38 @@ function buildMe(data, user) {
   };
 }
 
-function roomsWithUser(data, me) {
-  return data.rooms.map((room) => {
-    const players = (room.players || []).filter((player) => player.id !== "guest");
-    const joined = players.some((player) => player.id === me.id);
-    return {
-      ...room,
-      members: Math.max(room.members || 0, players.length),
-      ownerId: room.ownerId || "",
-      joined,
-      canManage: Boolean(room.ownerId && room.ownerId === me.id),
-      players: players.map((player) => ({ ...player, isMe: player.id === me.id }))
-    };
-  });
+function roomIsPublic(room) {
+  if (typeof room.isPublic === "boolean") {
+    return room.isPublic;
+  }
+  return room.type !== "私密";
+}
+
+function roomsWithUser(data, me, options = {}) {
+  const requestedRoomId = options.requestedRoomId || "";
+
+  return (data.rooms || [])
+    .filter((room) => {
+      const players = (room.players || []).filter((player) => player.id !== "guest");
+      const joined = players.some((player) => player.id === me.id);
+      if (roomIsPublic(room)) {
+        return true;
+      }
+      return joined || Boolean(requestedRoomId && room.id === requestedRoomId);
+    })
+    .map((room) => {
+      const players = (room.players || []).filter((player) => player.id !== "guest");
+      const joined = players.some((player) => player.id === me.id);
+      return {
+        ...room,
+        isPublic: roomIsPublic(room),
+        members: Math.max(room.members || 0, players.length),
+        ownerId: room.ownerId || "",
+        joined,
+        canManage: Boolean(room.ownerId && room.ownerId === me.id),
+        players: players.map((player) => ({ ...player, isMe: player.id === me.id }))
+      };
+    });
 }
 
 function roomPlayerFromUser(me) {
@@ -278,7 +297,8 @@ router.post("/predictions/submit", asyncRoute(async (req, res) => {
 router.get("/rooms", asyncRoute(async (req, res) => {
   const data = await readStore();
   const me = buildMe(data, await userFor(req));
-  res.json(ok({ rooms: roomsWithUser(data, me) }));
+  const requestedRoomId = typeof req.query.roomId === "string" ? req.query.roomId.trim() : "";
+  res.json(ok({ rooms: roomsWithUser(data, me, { requestedRoomId }) }));
 }));
 
 router.post("/rooms/create", asyncRoute(async (req, res) => {
@@ -294,6 +314,7 @@ router.post("/rooms/create", asyncRoute(async (req, res) => {
       id: makeRoomId(),
       name: payload.name,
       type: payload.type,
+      isPublic: payload.isPublic,
       topic: payload.topic,
       members: 1,
       heat: 50,
@@ -330,6 +351,7 @@ router.post("/rooms/update", asyncRoute(async (req, res) => {
     room.name = payload.name;
     room.topic = payload.topic;
     room.type = payload.type;
+    room.isPublic = typeof payload.isPublic === "boolean" ? payload.isPublic : room.isPublic !== false;
     room.updatedAt = new Date().toISOString();
     return { room, rooms: roomsWithUser(data, me) };
   });
