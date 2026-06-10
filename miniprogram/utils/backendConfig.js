@@ -16,6 +16,7 @@ const backendConfig = {
     updateRoom: "/worldcup/rooms/update",
     deleteRoom: "/worldcup/rooms/delete",
     joinRoom: "/worldcup/rooms/join",
+    sendRoomMessage: "/worldcup/rooms/messages",
     cheerRoom: "/worldcup/rooms/cheer",
     ranking: "/worldcup/rankings",
     profile: "/worldcup/profile"

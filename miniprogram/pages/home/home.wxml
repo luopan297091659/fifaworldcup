@@ -68,18 +68,22 @@
   <view class="section-title">系统群动态</view>
   <view class="match-list" wx:if="{{groups.length}}">
     <view class="card match-card group-card" wx:for="{{groups}}" wx:key="id">
-      <view class="match-head">
-        <text class="tag">{{item.status || '活跃'}}</text>
-        <text class="muted">{{item.memberCount || 0}} 人 · {{item.accessMode || '可邀请成员'}}</text>
+      <view class="group-card-top">
+        <view class="group-card-header">
+          <text class="tag">{{item.status || '活跃'}}</text>
+          <text class="group-card-title">{{item.name}}</text>
+        </view>
+        <text class="muted group-card-meta">{{item.memberCount || 0}} 人 · {{item.accessMode || '可邀请成员'}}</text>
       </view>
-      <view class="teams group-hero">
-        <text>{{item.name}}</text>
-        <text class="muted">{{item.description || '实时同步赛事战报与讨论动态。'}}</text>
+
+      <view class="group-card-body">
+        <text class="group-card-desc">{{item.description || '实时同步赛事战报与讨论动态。'}}</text>
+        <view class="group-card-meta-row">
+          <text class="muted">热度 {{item.heat || 0}}</text>
+          <text class="status">实时更新</text>
+        </view>
       </view>
-      <view class="match-foot">
-        <text class="muted">热度 {{item.heat || 0}} · 文字战报实时更新</text>
-        <text class="status">实时更新</text>
-      </view>
+
       <view class="group-action-row">
         <button class="mini-action-btn" open-type="share" data-name="{{item.name}}">邀请好友</button>
         <button class="mini-action-btn primary" bindtap="goGroupChat" data-id="{{item.id}}" data-name="{{item.name}}">进入群聊</button>

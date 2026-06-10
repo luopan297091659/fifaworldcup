@@ -397,6 +397,10 @@ function joinRoom(roomId) {
   return request("joinRoom", { roomId });
 }
 
+function sendRoomMessage(roomId, text) {
+  return request("sendRoomMessage", { roomId, text });
+}
+
 function cheerRoom(roomId) {
   return request("cheerRoom", { roomId });
 }
@@ -425,6 +429,7 @@ module.exports = {
   updateRoom,
   deleteRoom,
   joinRoom,
+  sendRoomMessage,
   cheerRoom,
   getRanking,
   getProfile,

@@ -64,7 +64,6 @@
       bindconfirm="onTextareaConfirm"
     />
     <view class="input-actions">
-      <button class="ghost-btn" bindtap="insertQuickText" data-text="👍 这场值得看">👍 快捷语</button>
       <button class="primary-btn send-btn" bindtap="sendMessage">发送</button>
     </view>
   </view>

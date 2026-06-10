@@ -139,7 +139,7 @@ function roomsWithUser(data, me, options = {}) {
 
   return (data.rooms || [])
     .filter((room) => {
-      const players = (room.players || []).filter((player) => player.id !== "guest");
+      const players = getRoomPlayers(room, data).filter((player) => player.id !== "guest");
       const joined = players.some((player) => player.id === me.id);
       if (roomIsPublic(room)) {
         return true;
@@ -147,7 +147,7 @@ function roomsWithUser(data, me, options = {}) {
       return joined || Boolean(requestedRoomId && room.id === requestedRoomId);
     })
     .map((room) => {
-      const players = (room.players || []).filter((player) => player.id !== "guest");
+      const players = getRoomPlayers(room, data).filter((player) => player.id !== "guest");
       const joined = players.some((player) => player.id === me.id);
       return {
         ...room,
@@ -159,6 +159,30 @@ function roomsWithUser(data, me, options = {}) {
         players: players.map((player) => ({ ...player, isMe: player.id === me.id }))
       };
     });
+}
+
+function getRoomPlayers(room, data) {
+  const explicitPlayers = Array.isArray(room.players) && room.players.length
+    ? room.players
+    : [];
+
+  if (explicitPlayers.length) {
+    return explicitPlayers;
+  }
+
+  const members = Array.isArray(data.members) ? data.members : [];
+  return members
+    .filter((member) => member.groupId === room.id || member.groupName === room.name)
+    .map((member) => ({
+      id: member.id,
+      name: member.name || member.displayName || "",
+      score: Number(member.score || member.points || 0),
+      role: member.role || "",
+      status: member.status || "在线",
+      avatarUrl: member.avatarUrl || member.avatar || "",
+      groupId: member.groupId || room.id,
+      groupName: member.groupName || room.name || ""
+    }));
 }
 
 function roomPlayerFromUser(me) {
@@ -405,6 +429,44 @@ router.post("/rooms/join", asyncRoute(async (req, res) => {
       room.heat = Math.min(100, Math.max(room.heat || 50, 50) + 3);
       room.updatedAt = new Date().toISOString();
     }
+    return { room, rooms: roomsWithUser(data, me) };
+  });
+
+  res.json(ok(result));
+}));
+
+router.post("/rooms/messages", asyncRoute(async (req, res) => {
+  const currentUser = await getCurrentUser(req);
+  if (!currentUser) {
+    throw unauthorized();
+  }
+
+  const roomId = validateRoomId((req.body || {}).roomId);
+  const text = String((req.body || {}).text || "").trim();
+  if (!text) {
+    throw badRequest("Message text is required");
+  }
+
+  const me = buildMe(await readStore(), currentUser);
+  const result = await updateStore((data) => {
+    const room = data.rooms.find((item) => item.id === roomId);
+    if (!room) {
+      throw notFound("Room not found");
+    }
+
+    const message = {
+      id: `msg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      sender: me.name || me.displayName || "我",
+      userId: me.id,
+      time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+      type: "member"
+    };
+
+    room.messages = Array.isArray(room.messages) ? [...room.messages, message] : [message];
+    room.feedMessages = Array.isArray(room.feedMessages) ? [...room.feedMessages, text] : [text];
+    room.updatedAt = new Date().toISOString();
+
     return { room, rooms: roomsWithUser(data, me) };
   });
 

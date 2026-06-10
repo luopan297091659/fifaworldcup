@@ -10,6 +10,19 @@ function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function normalizeRoomMember(member = {}, fallbackGroup = {}) {
+  return {
+    id: member.id || "",
+    name: member.name || member.displayName || "",
+    role: member.role || member.title || "",
+    score: Number(member.score || member.points || 0),
+    status: member.status || "在线",
+    avatarUrl: member.avatarUrl || member.avatar || "",
+    groupId: member.groupId || fallbackGroup.id || "",
+    groupName: member.groupName || fallbackGroup.name || ""
+  };
+}
+
 function ensureStore() {
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -49,12 +62,18 @@ function ensureSystemRooms(data, base) {
     existing.type = existing.type || "系统群";
     existing.isPublic = typeof existing.isPublic === "boolean" ? existing.isPublic : true;
     existing.topic = existing.topic || group.description || "系统群，实时同步战报与讨论。";
-    existing.members = Math.max(Number(existing.members || 0), Number(group.memberCount || 0));
     existing.heat = Number(existing.heat || group.heat || 0);
     existing.feedMessages = Array.isArray(group.feedMessages) ? group.feedMessages.slice() : (existing.feedMessages || []);
     existing.shareText = existing.shareText || group.shareText || "";
     existing.ownerId = existing.ownerId || "system";
-    existing.players = Array.isArray(existing.players) ? existing.players : [];
+
+    const memberList = Array.isArray(data.members) ? data.members : Array.isArray(base.members) ? base.members : [];
+    const syncedPlayers = memberList
+      .filter((member) => member.groupId === group.id || member.groupName === group.name)
+      .map((member) => normalizeRoomMember(member, group));
+
+    existing.players = syncedPlayers.length ? syncedPlayers : (Array.isArray(existing.players) ? existing.players : []);
+    existing.members = Math.max(Number(existing.members || 0), Number(group.memberCount || 0), existing.players.length);
 
     roomById.set(group.id, existing);
   });

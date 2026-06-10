@@ -9,7 +9,7 @@ Page({
     messages: [],
     draft: "",
     loading: false,
-    quickPhrases: ["👍 加油", "⚽ 赛况", "🎉 期待", "🔥 这场必须看"]
+    quickPhrases: ["👍 这场值得看", "⚽ 这场必须看", "📣 赛前提醒", "🔥 热度很高", "🎉 期待精彩", "💬 我来跟进"]
   },
 
   onLoad(options = {}) {
@@ -48,14 +48,28 @@ Page({
   },
 
   buildMessages(room) {
+    const userMessages = Array.isArray(room && room.messages) ? room.messages : [];
     const feedMessages = Array.isArray(room && room.feedMessages) ? room.feedMessages : [];
-    if (feedMessages.length) {
-      return feedMessages.map((text, index) => ({
-        id: `feed-${index}`,
-        text,
-        time: index === 0 ? "实时赛况" : "群消息",
-        type: "system"
-      }));
+    const seenTexts = new Set(userMessages.map((item) => `${item.text || ""}|${item.userId || ""}`));
+
+    const messages = [
+      ...userMessages.map((item) => ({
+        ...item,
+        sender: item.sender || (item.userId === "me" ? "我" : "群成员"),
+        type: item.type || "member"
+      })),
+      ...feedMessages
+        .filter((item) => typeof item === "string" && !seenTexts.has(`${item}|system`))
+        .map((text, index) => ({
+          id: `feed-${index}`,
+          text,
+          time: index === 0 ? "实时赛况" : "群消息",
+          type: "system"
+        }))
+    ];
+
+    if (messages.length) {
+      return messages;
     }
 
     return [
@@ -97,18 +111,21 @@ Page({
       return;
     }
 
-    const time = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-    this.setData({
-      draft: "",
-      messages: [
-        ...(this.data.messages || []),
-        { id: `${Date.now()}`, text: content, time, type: "me", sender: "我" }
-      ]
-    }, () => {
-      this.scrollToBottom();
-    });
+    if (!this.data.roomId) {
+      wx.showToast({ title: "房间信息缺失", icon: "none" });
+      return;
+    }
 
-    wx.showToast({ title: "已发送", icon: "success" });
+    api.sendRoomMessage(this.data.roomId, content)
+      .then(() => {
+        this.setData({ draft: "" });
+        this.loadRoom();
+        wx.showToast({ title: "已发送", icon: "success" });
+      })
+      .catch((error) => {
+        console.error("发送群内消息失败:", error);
+        wx.showToast({ title: "发送失败，请稍后重试", icon: "none" });
+      });
   },
 
   onTextareaConfirm(event) {
