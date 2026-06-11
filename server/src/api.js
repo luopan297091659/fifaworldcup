@@ -159,16 +159,33 @@ function canSubmitPrediction(match, now = new Date()) {
   return Boolean(match && match.status !== "closed" && !hasKickedOff(match, now) && isTomorrowMatch(match, now));
 }
 
+function decorateLiveState(match, now = new Date()) {
+  if (!match) return match;
+  if (match.finalScore) {
+    return { ...match, status: "closed" };
+  }
+  if (match.liveScore || hasKickedOff(match, now)) {
+    return {
+      ...match,
+      status: match.status === "closed" ? "closed" : "live",
+      liveScore: match.liveScore || "",
+      latestReport: match.latestReport || "比赛已开赛，等待服务端同步最新比分。"
+    };
+  }
+  return match;
+}
+
 function decorateMatchForPrediction(match, now = new Date()) {
+  const liveMatch = decorateLiveState(match, now);
   const predictionOpen = canSubmitPrediction(match, now);
   return {
-    ...match,
+    ...liveMatch,
     predictionOpen,
     predictionLockedReason: predictionOpen
       ? ""
-      : match.status === "closed"
+      : liveMatch.status === "closed"
         ? "closed"
-        : hasKickedOff(match, now)
+        : hasKickedOff(liveMatch, now)
           ? "started"
           : "not_tomorrow"
   };
@@ -368,11 +385,14 @@ router.get("/home", asyncRoute(async (req, res) => {
   const matches = Array.isArray(data.matches) ? data.matches.map((match) => decorateMatchForPrediction(match, now)) : [];
   const tomorrowMatches = matches.filter((match) => isTomorrowMatch(match, now));
   const predictionMatches = tomorrowMatches.length ? tomorrowMatches : matches;
-  const latestMatches = Array.isArray(data.latestMatches) && data.latestMatches.length
-    ? data.latestMatches
-    : matches
-      .filter((match) => match.status === "live" || match.liveScore || match.finalScore)
-      .map(latestItemFromMatch);
+  const latestFromMatches = matches
+    .filter((match) => match.status === "live" || match.liveScore || match.finalScore)
+    .map(latestItemFromMatch);
+  const latestMatches = latestFromMatches.length
+    ? latestFromMatches
+    : Array.isArray(data.latestMatches) && data.latestMatches.length
+      ? data.latestMatches.map((match) => decorateLiveState(match, now))
+      : [];
 
   res.json(ok({
     me,

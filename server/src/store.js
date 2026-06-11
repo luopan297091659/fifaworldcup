@@ -81,9 +81,28 @@ function ensureSystemRooms(data, base) {
   return Array.from(roomById.values());
 }
 
+function mergeMatches(dataMatches, baseMatches) {
+  const matchById = new Map();
+  (Array.isArray(baseMatches) ? baseMatches : []).forEach((match) => {
+    if (match && match.id) {
+      matchById.set(match.id, match);
+    }
+  });
+  (Array.isArray(dataMatches) ? dataMatches : []).forEach((match) => {
+    if (match && match.id) {
+      matchById.set(match.id, {
+        ...(matchById.get(match.id) || {}),
+        ...match
+      });
+    }
+  });
+  return Array.from(matchById.values());
+}
+
 function normalizeStoreData(data = {}) {
   const base = cloneSeed();
   const rooms = ensureSystemRooms(data, base);
+  const matches = mergeMatches(data.matches, base.matches);
 
   return {
     ...base,
@@ -91,7 +110,7 @@ function normalizeStoreData(data = {}) {
     users: isObject(data.users) ? data.users : {},
     sessions: isObject(data.sessions) ? data.sessions : {},
     predictions: isObject(data.predictions) ? data.predictions : {},
-    matches: Array.isArray(data.matches) ? data.matches : base.matches,
+    matches,
     rooms,
     rankingPlayers: Array.isArray(data.rankingPlayers) ? data.rankingPlayers : base.rankingPlayers,
     members: Array.isArray(data.members) ? data.members : base.members,
@@ -112,7 +131,17 @@ function writeFileStore(data) {
   ensureStore();
   const tempPath = `${storePath}.${process.pid}.tmp`;
   fs.writeFileSync(tempPath, JSON.stringify(data, null, 2));
-  fs.renameSync(tempPath, storePath);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      fs.renameSync(tempPath, storePath);
+      return;
+    } catch (error) {
+      if (attempt === 4 || !["EPERM", "EBUSY", "EACCES"].includes(error.code)) {
+        throw error;
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50 * (attempt + 1));
+    }
+  }
 }
 
 function updateFileStore(mutator) {
