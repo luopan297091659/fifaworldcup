@@ -142,6 +142,17 @@ Page({
     return rankIndex >= 0 ? rankIndex + 1 : 0;
   },
 
+  requireLogin() {
+    if (api.isLoggedIn()) {
+      return Promise.resolve();
+    }
+
+    wx.showToast({ title: "请先微信登录", icon: "none" });
+    return api.loginWithWechatProfile().then(() => {
+      wx.showToast({ title: "登录成功", icon: "success" });
+    });
+  },
+
   goPredict(event) {
     const id = event.currentTarget.dataset.id;
 
@@ -176,7 +187,8 @@ Page({
       return;
     }
 
-    api.joinRoom(roomId)
+    this.requireLogin()
+      .then(() => api.joinRoom(roomId))
       .then(() => {
         wx.showToast({ title: "已加入该群", icon: "success" });
         this.loadHome();
