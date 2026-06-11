@@ -128,6 +128,46 @@ function buildMe(data, user) {
   };
 }
 
+function buildPublicGroupFeed(data, rooms) {
+  const seedGroups = Array.isArray(data.groups) ? data.groups : [];
+  const publicRooms = (Array.isArray(rooms) ? rooms : [])
+    .filter((room) => roomIsPublic(room))
+    .map((room) => ({
+      ...room,
+      id: room.id,
+      name: room.name || "公开群",
+      description: room.topic || room.description || "公开群已同步到服务端，所有登录用户都可查看群内预测数据、战报与热度信息。",
+      memberCount: Number(room.members || room.memberCount || 0),
+      heat: Number(room.heat || 0),
+      status: room.joined ? "已加入" : (room.status || "活跃"),
+      accessMode: room.type || "公开群 · 查看所有人预测数据",
+      shareText: room.shareText || "公开群已同步到服务端，所有登录用户都可查看群内预测数据、热度与战报。",
+      feedMessages: Array.isArray(room.feedMessages) ? room.feedMessages.slice() : [],
+      isPublic: true,
+      ownerId: room.ownerId || ""
+    }));
+
+  const merged = [...seedGroups, ...publicRooms].filter((item) => item && item.id);
+  const deduped = new Map();
+
+  merged.forEach((item) => {
+    if (!deduped.has(item.id)) {
+      deduped.set(item.id, item);
+      return;
+    }
+
+    deduped.set(item.id, {
+      ...deduped.get(item.id),
+      ...item,
+      memberCount: Number(item.memberCount || item.members || deduped.get(item.id).memberCount || 0),
+      heat: Number(item.heat || deduped.get(item.id).heat || 0),
+      isPublic: true
+    });
+  });
+
+  return Array.from(deduped.values());
+}
+
 function roomIsPublic(room) {
   if (typeof room.isPublic !== "undefined") {
     return normalizeVisibilityFlag(room.isPublic);
@@ -245,16 +285,18 @@ router.get("/home", asyncRoute(async (req, res) => {
   const me = buildMe(data, await userFor(req));
   const predictions = userPredictions(data, me.id);
   const rooms = roomsWithUser(data, me);
+  const publicGroups = buildPublicGroupFeed(data, rooms);
 
   res.json(ok({
     me,
     matches: data.matches,
     rooms,
+    publicGroups,
     topRoom: rooms[0] || null,
     myRoomRank: rooms[0] ? rooms[0].players.findIndex((player) => player.id === me.id) + 1 : 0,
     predictions: predictionMap(predictions),
     members: Array.isArray(data.members) ? data.members : [],
-    groups: Array.isArray(data.groups) ? data.groups : [],
+    groups: publicGroups,
     latestMatches: Array.isArray(data.latestMatches) ? data.latestMatches : (Array.isArray(data.matches) ? data.matches.slice(0, 3) : []),
     opening: tournamentInfo(data, req)
   }));

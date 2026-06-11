@@ -50,6 +50,10 @@ Page({
           ? homeData.latestMatches
           : (Array.isArray(homeData.matches) ? homeData.matches.slice(0, 3) : []);
 
+        const publicGroups = Array.isArray(homeData.publicGroups)
+          ? homeData.publicGroups
+          : (Array.isArray(homeData.groups) ? homeData.groups : []);
+
         this.setData({
           me: homeData.me,
           matches: homeData.matches.map((match) => ({
@@ -60,7 +64,7 @@ Page({
               : "提交后显示 AI 参考"
           })),
           members: Array.isArray(homeData.members) ? homeData.members : [],
-          groups: Array.isArray(homeData.groups) ? homeData.groups : [],
+          groups: publicGroups,
           latestMatches,
           topRoom,
           myRoomRank,
@@ -163,6 +167,42 @@ Page({
         console.error("导航错误:", error);
         wx.showToast({ title: "导航失败", icon: "none" });
       });
+  },
+
+  joinPublicGroup(event) {
+    const roomId = event.currentTarget.dataset.roomId || "";
+    if (!roomId) {
+      wx.showToast({ title: "群组信息缺失", icon: "none" });
+      return;
+    }
+
+    api.joinRoom(roomId)
+      .then(() => {
+        wx.showToast({ title: "已加入该群", icon: "success" });
+        this.loadHome();
+      })
+      .catch((error) => {
+        console.error("加入公开群失败:", error);
+        wx.showToast({ title: "加入失败", icon: "none" });
+      });
+  },
+
+  goRanking() {
+    wx.navigateTo({ url: "/pages/ranking/ranking" });
+  },
+
+  goLive(event) {
+    const roomId = event.currentTarget.dataset.roomId || "";
+    const roomName = event.currentTarget.dataset.name || "群内预测实况";
+
+    if (!roomId) {
+      wx.showToast({ title: "群组信息缺失", icon: "none" });
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/chat/chat?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
+    });
   },
 
   goRoom() {

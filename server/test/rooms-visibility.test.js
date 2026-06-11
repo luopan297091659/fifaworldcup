@@ -248,6 +248,57 @@ test('public rooms should always be labeled as public even if the client sends a
   }
 });
 
+test('home feed should expose public rooms as public group dynamics', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-home-owner-${Date.now()}`);
+    const other = await login(base, `visibility-home-other-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `首页公开群-${Date.now()}`,
+        topic: '应出现在公开群动态中',
+        type: '公开',
+        isPublic: true
+      })
+    });
+
+    const home = await request(base, '/worldcup/home', {
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${other.token}`
+      }
+    });
+
+    const publicGroup = (home.publicGroups || home.groups || []).find((group) => group.id === created.room.id);
+    assert.ok(publicGroup, 'created public room should appear in the public group feed');
+    assert.equal(publicGroup.isPublic, true, 'public feed item should keep public visibility');
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
 test('private rooms stay hidden from non-members but remain shareable via invite link', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

@@ -73,24 +73,20 @@
           <text class="tag">{{item.status || '活跃'}}</text>
           <text class="group-card-title">{{item.name}}</text>
         </view>
-        <text class="muted group-card-meta">{{item.memberCount || 0}} 人 · {{item.accessMode || '公开群 · 查看所有人预测数据'}}</text>
+        <text class="muted">热度 {{item.heat || 0}}</text>
       </view>
 
       <view class="group-card-body">
-        <text class="group-card-desc">{{item.description || '公开群已同步到服务端，所有登录用户都可查看群内预测数据与战报。'}}</text>
-        <view class="group-card-meta-row">
-          <text class="muted">热度 {{item.heat || 0}}</text>
-          <text class="status">实时更新</text>
-        </view>
+        <text class="muted">{{item.memberCount || 0}} 人在线 · {{item.accessMode || '公开群'}}</text>
+        <text class="group-card-desc" wx:if="{{item.shareText || item.description}}">{{item.shareText || item.description}}</text>
       </view>
 
       <view class="group-action-row">
-        <button class="mini-action-btn" open-type="share" data-name="{{item.name}}">分享群动态</button>
+        <button class="mini-action-btn" open-type="share" data-name="{{item.name}}" data-room-id="{{item.id}}">邀请加入</button>
+        <button class="mini-action-btn" bindtap="joinPublicGroup" data-room-id="{{item.id}}" wx:if="{{!item.joined}}">立即加入</button>
+        <button class="mini-action-btn" bindtap="goRanking">积分排名</button>
+        <button class="mini-action-btn" bindtap="goLive" data-room-id="{{item.id}}" data-name="{{item.name}}">预测实况</button>
       </view>
-      <view class="group-feed" wx:if="{{item.feedMessages && item.feedMessages.length}}">
-        <view class="feed-item" wx:for="{{item.feedMessages}}" wx:key="*this">{{item}}</view>
-      </view>
-      <view class="muted group-note">{{item.shareText || '公开群已同步到服务端，所有登录用户都可查看群内预测数据、战报与热度信息。'}}</view>
     </view>
   </view>
   <view class="card empty-card" wx:else>
