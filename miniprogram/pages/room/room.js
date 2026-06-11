@@ -1,4 +1,5 @@
 const api = require("../../utils/api");
+const { normalizeCreatePublicState } = require("../../utils/roomVisibility");
 const { buildRoomHighlights } = require("../../utils/fun");
 
 Page({
@@ -85,7 +86,7 @@ Page({
   },
 
   onToggleCreatePublic(event) {
-    this.setData({ createIsPublic: Boolean(event.detail.value) });
+    this.setData({ createIsPublic: normalizeCreatePublicState(event.detail.value) });
   },
 
   confirmCreateRoom() {
@@ -200,20 +201,6 @@ Page({
         wx.showToast({ title: "助威失败", icon: "none" });
         console.error("助威错误:", error);
       });
-  },
-
-  openChat(event) {
-    const roomId = event.currentTarget.dataset.id;
-    const roomName = event.currentTarget.dataset.name || "房间讨论";
-
-    if (!roomId) {
-      wx.showToast({ title: "房间信息异常", icon: "none" });
-      return;
-    }
-
-    wx.navigateTo({
-      url: `/pages/chat/chat?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
-    });
   },
 
   isSystemRoom(room = {}) {

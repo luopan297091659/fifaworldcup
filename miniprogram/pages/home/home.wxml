@@ -65,7 +65,7 @@
     <text>暂无线上比赛数据</text>
   </view>
 
-  <view class="section-title">系统群动态</view>
+  <view class="section-title">系统动态</view>
   <view class="match-list" wx:if="{{groups.length}}">
     <view class="card match-card group-card" wx:for="{{groups}}" wx:key="id">
       <view class="group-card-top">
@@ -86,12 +86,11 @@
 
       <view class="group-action-row">
         <button class="mini-action-btn" open-type="share" data-name="{{item.name}}">邀请好友</button>
-        <button class="mini-action-btn primary" bindtap="goGroupChat" data-id="{{item.id}}" data-name="{{item.name}}">进入群聊</button>
       </view>
       <view class="group-feed" wx:if="{{item.feedMessages && item.feedMessages.length}}">
         <view class="feed-item" wx:for="{{item.feedMessages}}" wx:key="*this">{{item}}</view>
       </view>
-      <view class="muted group-note">{{item.shareText || '系统群会持续同步赛况与讨论内容。'}}</view>
+      <view class="muted group-note">{{item.shareText || '系统动态会持续同步赛况与热度信息。'}}</view>
     </view>
   </view>
   <view class="card empty-card" wx:else>

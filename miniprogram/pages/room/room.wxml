@@ -1,7 +1,7 @@
 <view class="page">
   <view class="hero">
     <text class="hero-title">好友小组</text>
-    <text class="hero-subtitle">把小组发到群里，每场比赛一起记录预测。</text>
+    <text class="hero-subtitle">把小组发给好友，每场比赛一起记录预测。</text>
   </view>
 
   <view class="toolbar">
@@ -52,8 +52,8 @@
       </view>
 
       <view class="topic">
-        <text class="topic-label">群话题</text>
-        <text>{{item.topic || '可邀请成员或直接进入，小组内支持实时讨论。'}}</text>
+        <text class="topic-label">小组话题</text>
+        <text>{{item.topic || '可邀请成员一起记录预测，关注每场比赛的赛果。'}}</text>
       </view>
 
       <view class="heat">
@@ -91,7 +91,6 @@
           bindtap="joinRoom"
           data-id="{{item.id}}"
         >加入小组</button>
-        <button class="primary-btn share-btn" bindtap="openChat" data-id="{{item.id}}" data-name="{{item.name}}">进入群内讨论</button>
         <button class="ghost-btn share-btn" open-type="share" data-id="{{item.id}}" data-room="{{item.name}}">邀请成员</button>
       </view>
     </view>

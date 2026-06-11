@@ -165,20 +165,6 @@ Page({
       });
   },
 
-  goGroupChat(event) {
-    const roomId = event.currentTarget.dataset.id;
-    const roomName = event.currentTarget.dataset.name || "系统群";
-
-    if (!roomId) {
-      wx.showToast({ title: "群聊信息异常", icon: "none" });
-      return;
-    }
-
-    wx.navigateTo({
-      url: `/pages/chat/chat?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
-    });
-  },
-
   goRoom() {
     wx.switchTab({
       url: "/pages/room/room"
