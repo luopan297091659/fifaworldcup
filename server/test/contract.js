@@ -39,7 +39,8 @@ async function main() {
     assert(Array.isArray(home.rooms), "home.rooms must be an array");
     assert(home.predictions && typeof home.predictions === "object", "home.predictions is required");
 
-    const detail = await request(base, `/worldcup/matches/detail?matchId=${home.matches[0].id}`, { headers: authHeaders });
+    const matchForPrediction = home.tomorrowMatches[0] || home.matches[0];
+    const detail = await request(base, `/worldcup/matches/detail?matchId=${matchForPrediction.id}`, { headers: authHeaders });
     assert(detail.match && detail.match.id, "match detail is required");
     assert(detail.match.lineups && Array.isArray(detail.match.lineups.home), "match.lineups.home must be an array");
 
@@ -47,7 +48,7 @@ async function main() {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify({
-        matchId: "m1",
+        matchId: detail.match.id,
         result: detail.match.aiPick || "home",
         score: "2:1",
         totalGoals: "2-3",
@@ -62,7 +63,7 @@ async function main() {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify({
-        matchId: "m1",
+        matchId: detail.match.id,
         result: detail.match.aiPick || "home",
         score: "3:1",
         totalGoals: "2-3",
@@ -74,7 +75,7 @@ async function main() {
     assert.equal(duplicatePrediction.response.status, 400, "duplicate prediction should be rejected");
 
     const predictedHome = await request(base, "/worldcup/home", { headers: authHeaders });
-    assert.equal(predictedHome.predictions.m1.score, "2:1", "home prediction summary should include score");
+    assert.equal(predictedHome.predictions[detail.match.id].score, "2:1", "home prediction summary should include score");
 
     const rooms = await request(base, "/worldcup/rooms", { headers: authHeaders });
     assert(Array.isArray(rooms.rooms), "rooms.rooms must be an array");

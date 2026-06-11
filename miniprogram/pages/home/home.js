@@ -7,29 +7,15 @@ Page({
     members: [],
     groups: [],
     latestMatches: [],
+    latestResult: null,
     topRoom: null,
     myRoomRank: 0,
     opening: {},
-    heroImageUrl: "",
-    countdown: {
-      days: "00",
-      hours: "00",
-      minutes: "00",
-      seconds: "00",
-      finished: false
-    }
+    heroImageUrl: ""
   },
 
   onShow() {
     this.loadHome();
-  },
-
-  onHide() {
-    this.stopCountdown();
-  },
-
-  onUnload() {
-    this.stopCountdown();
   },
 
   loadHome() {
@@ -49,6 +35,8 @@ Page({
         const latestMatches = Array.isArray(homeData.latestMatches) && homeData.latestMatches.length
           ? homeData.latestMatches
           : (Array.isArray(homeData.matches) ? homeData.matches.slice(0, 3) : []);
+        const decoratedLatestMatches = latestMatches.map((match) => this.decorateLatestMatch(match));
+        const latestResult = this.pickLatestResult(decoratedLatestMatches);
 
         const publicGroups = (Array.isArray(homeData.publicGroups)
           ? homeData.publicGroups
@@ -70,26 +58,63 @@ Page({
           matches: homeData.matches.map((match) => ({
             ...match,
             myPrediction: this.normalizePredictionSummary(predictions[match.id]),
-            statusText: match.status === "closed" ? "已公布" : predictions[match.id] ? "已预测" : "去预测",
+            statusText: this.getPredictionStatusText(match, predictions[match.id]),
             aiSummary: predictions[match.id] || match.status === "closed"
               ? `AI：${match.aiPick} ${match.aiScore}`
               : "提交后显示 AI 参考"
           })),
           members: Array.isArray(homeData.members) ? homeData.members : [],
           groups: publicGroups,
-          latestMatches,
+          latestMatches: decoratedLatestMatches,
+          latestResult,
           topRoom,
           myRoomRank,
           opening: homeData.opening || {},
           heroImageUrl: (homeData.opening && homeData.opening.heroImageUrl) || ""
-        }, () => {
-          this.startCountdown(this.data.opening.openingKickoffAt);
         });
       })
       .catch((error) => {
         console.error("首页加载错误:", error);
         wx.showToast({ title: "线上数据不可用", icon: "none" });
       });
+  },
+
+  getPredictionStatusText(match, prediction) {
+    if (match.status === "closed") {
+      return "已公布";
+    }
+    if (prediction) {
+      return "已预测";
+    }
+    if (match.predictionOpen === false) {
+      return match.predictionLockedReason === "started" ? "已开赛" : "暂未开放";
+    }
+    return "去预测";
+  },
+
+  decorateLatestMatch(match) {
+    const score = match.finalScore || match.liveScore || "";
+    const statusText = match.status === "closed"
+      ? "已完赛"
+      : match.status === "live"
+        ? (match.minute ? `进行中 ${match.minute}` : "进行中")
+        : "待开赛";
+
+    return {
+      ...match,
+      displayScore: score || "VS",
+      statusText,
+      reportText: match.report || match.latestReport || (score ? "比分已同步" : "等待战报同步")
+    };
+  },
+
+  pickLatestResult(latestMatches) {
+    if (!Array.isArray(latestMatches) || !latestMatches.length) {
+      return null;
+    }
+    return latestMatches.find((match) => match.status === "live")
+      || latestMatches.find((match) => match.finalScore || match.liveScore)
+      || latestMatches[0];
   },
 
   normalizePredictionSummary(prediction) {
@@ -112,61 +137,6 @@ Page({
       score,
       text: result && score ? `我的预测 ${result} ${score}` : `我的预测 ${score || result}`
     };
-  },
-
-  startCountdown(openingKickoffAt) {
-    this.stopCountdown();
-    this.updateCountdown(openingKickoffAt);
-    this.countdownTimer = setInterval(() => {
-      this.updateCountdown(openingKickoffAt);
-    }, 1000);
-  },
-
-  stopCountdown() {
-    if (this.countdownTimer) {
-      clearInterval(this.countdownTimer);
-      this.countdownTimer = null;
-    }
-  },
-
-  updateCountdown(openingKickoffAt) {
-    const target = openingKickoffAt ? new Date(openingKickoffAt).getTime() : 0;
-    const diff = target - Date.now();
-    if (!target || diff <= 0) {
-      this.setData({
-        countdown: {
-          days: "00",
-          hours: "00",
-          minutes: "00",
-          seconds: "00",
-          finished: true
-        }
-      });
-      this.stopCountdown();
-      return;
-    }
-
-    const dayMs = 24 * 60 * 60 * 1000;
-    const hourMs = 60 * 60 * 1000;
-    const minuteMs = 60 * 1000;
-    const days = Math.floor(diff / dayMs);
-    const hours = Math.floor((diff % dayMs) / hourMs);
-    const minutes = Math.floor((diff % hourMs) / minuteMs);
-    const seconds = Math.floor((diff % minuteMs) / 1000);
-
-    this.setData({
-      countdown: {
-        days: this.pad(days),
-        hours: this.pad(hours),
-        minutes: this.pad(minutes),
-        seconds: this.pad(seconds),
-        finished: false
-      }
-    });
-  },
-
-  pad(value) {
-    return String(value).padStart(2, "0");
   },
 
   isGroupJoined(group, userId) {

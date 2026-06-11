@@ -7,23 +7,17 @@
       <text class="hero-subtitle">{{opening.openingText || "2026 世界杯开幕战"}} · {{opening.openingMatch || "墨西哥 vs 南非"}}</text>
       <text class="hero-meta">{{opening.openingVenue || "Mexico City Stadium"}}</text>
 
-      <view class="countdown">
-        <view class="countdown-item">
-          <text class="countdown-value">{{countdown.days}}</text>
-          <text class="countdown-label">天</text>
+      <view class="live-result-card" wx:if="{{latestResult}}">
+        <view class="live-result-head">
+          <text class="live-pill">{{latestResult.statusText}}</text>
+          <text class="live-time">{{latestResult.updatedAt || latestResult.time || '战报同步中'}}</text>
         </view>
-        <view class="countdown-item">
-          <text class="countdown-value">{{countdown.hours}}</text>
-          <text class="countdown-label">时</text>
+        <view class="live-score-row">
+          <text class="live-team">{{latestResult.home}}</text>
+          <text class="live-score">{{latestResult.displayScore}}</text>
+          <text class="live-team">{{latestResult.away}}</text>
         </view>
-        <view class="countdown-item">
-          <text class="countdown-value">{{countdown.minutes}}</text>
-          <text class="countdown-label">分</text>
-        </view>
-        <view class="countdown-item">
-          <text class="countdown-value">{{countdown.seconds}}</text>
-          <text class="countdown-label">秒</text>
-        </view>
+        <text class="live-report">{{latestResult.reportText}}</text>
       </view>
 
       <view class="hero-stats">
@@ -43,7 +37,7 @@
     </view>
   </view>
 
-  <view class="section-title">近期比赛</view>
+  <view class="section-title">明日预测</view>
   <view class="match-list" wx:if="{{matches.length}}">
     <view class="card match-card" wx:for="{{matches}}" wx:key="id" bindtap="goPredict" data-id="{{item.id}}">
       <view class="match-head">
@@ -104,12 +98,12 @@
       </view>
       <view class="teams">
         <text>{{item.home}}</text>
-        <text class="versus">VS</text>
+        <text class="versus">{{item.displayScore}}</text>
         <text>{{item.away}}</text>
       </view>
       <view class="match-foot">
-        <text class="muted">{{item.venue || '赛事场馆'}}</text>
-        <text class="status">{{item.status === 'closed' ? '已公布' : '待开赛'}}</text>
+        <text class="muted">{{item.reportText || item.venue || '赛事场馆'}}</text>
+        <text class="status">{{item.statusText}}</text>
       </view>
     </view>
   </view>

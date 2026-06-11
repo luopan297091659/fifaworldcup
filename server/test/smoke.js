@@ -31,12 +31,12 @@ async function main() {
     };
 
     await request(base, "/worldcup/home", { headers: authHeaders });
-    await request(base, "/worldcup/matches/detail?matchId=m1", { headers: authHeaders });
+    await request(base, "/worldcup/matches/detail?matchId=m2", { headers: authHeaders });
     await request(base, "/worldcup/predictions/submit", {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify({
-        matchId: "m1",
+        matchId: "m2",
         result: "主胜",
         score: "2:1",
         totalGoals: "2-3",

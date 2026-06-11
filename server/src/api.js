@@ -123,6 +123,76 @@ function scorePrediction(match, prediction) {
   return prediction.result === resultFromScore(match.finalScore) ? 10 : 0;
 }
 
+function dayKey(date, timeZone) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function predictionTimeZone() {
+  return process.env.PREDICTION_TIME_ZONE || "Asia/Shanghai";
+}
+
+function isTomorrowMatch(match, now = new Date()) {
+  if (!match || !match.kickoffAt) return false;
+  const kickoff = new Date(match.kickoffAt);
+  if (Number.isNaN(kickoff.getTime())) return false;
+  const timeZone = predictionTimeZone();
+  return dayKey(kickoff, timeZone) === dayKey(addDays(now, 1), timeZone);
+}
+
+function hasKickedOff(match, now = new Date()) {
+  const kickoff = match && match.kickoffAt ? new Date(match.kickoffAt).getTime() : 0;
+  return Boolean(kickoff && !Number.isNaN(kickoff) && kickoff <= now.getTime());
+}
+
+function canSubmitPrediction(match, now = new Date()) {
+  return Boolean(match && match.status !== "closed" && !hasKickedOff(match, now) && isTomorrowMatch(match, now));
+}
+
+function decorateMatchForPrediction(match, now = new Date()) {
+  const predictionOpen = canSubmitPrediction(match, now);
+  return {
+    ...match,
+    predictionOpen,
+    predictionLockedReason: predictionOpen
+      ? ""
+      : match.status === "closed"
+        ? "closed"
+        : hasKickedOff(match, now)
+          ? "started"
+          : "not_tomorrow"
+  };
+}
+
+function latestItemFromMatch(match) {
+  return {
+    id: `latest-${match.id}`,
+    matchId: match.id,
+    home: match.home,
+    away: match.away,
+    group: match.group || "",
+    time: match.time || "",
+    venue: match.venue || "",
+    status: match.status || "open",
+    kickoffAt: match.kickoffAt || "",
+    finalScore: match.finalScore || "",
+    liveScore: match.liveScore || "",
+    minute: match.minute || "",
+    report: match.latestReport || match.report || "",
+    updatedAt: match.scoreUpdatedAt || match.updatedAt || ""
+  };
+}
+
 function buildMe(data, user) {
   const predictions = userPredictions(data, user.id);
   const settledScore = data.matches.reduce((sum, match) => sum + scorePrediction(match, predictions[match.id]), 0);
@@ -294,10 +364,19 @@ router.get("/home", asyncRoute(async (req, res) => {
   const predictions = userPredictions(data, me.id);
   const rooms = roomsWithUser(data, me);
   const publicGroups = buildPublicGroupFeed(data, rooms);
+  const now = new Date();
+  const matches = Array.isArray(data.matches) ? data.matches.map((match) => decorateMatchForPrediction(match, now)) : [];
+  const tomorrowMatches = matches.filter((match) => isTomorrowMatch(match, now));
+  const predictionMatches = tomorrowMatches.length ? tomorrowMatches : matches;
+  const latestMatches = Array.isArray(data.latestMatches) && data.latestMatches.length
+    ? data.latestMatches
+    : matches
+      .filter((match) => match.status === "live" || match.liveScore || match.finalScore)
+      .map(latestItemFromMatch);
 
   res.json(ok({
     me,
-    matches: data.matches,
+    matches: predictionMatches,
     rooms,
     publicGroups,
     topRoom: rooms[0] || null,
@@ -305,7 +384,8 @@ router.get("/home", asyncRoute(async (req, res) => {
     predictions: predictionMap(predictions),
     members: Array.isArray(data.members) ? data.members : [],
     groups: publicGroups,
-    latestMatches: Array.isArray(data.latestMatches) ? data.latestMatches : (Array.isArray(data.matches) ? data.matches.slice(0, 3) : []),
+    latestMatches: latestMatches.length ? latestMatches : matches.slice(0, 3).map(latestItemFromMatch),
+    tomorrowMatches,
     opening: tournamentInfo(data, req)
   }));
 }));
@@ -321,7 +401,7 @@ router.get("/matches/detail", asyncRoute(async (req, res) => {
 
   const predictions = userPredictions(data, me.id);
   res.json(ok({
-    match,
+    match: decorateMatchForPrediction(match),
     prediction: predictions[match.id] || null
   }));
 }));
@@ -340,6 +420,9 @@ router.post("/predictions/submit", asyncRoute(async (req, res) => {
     }
     if (match.status === "closed") {
       throw badRequest("Match is closed");
+    }
+    if (!canSubmitPrediction(match)) {
+      throw badRequest("Predictions are only open on the day before kickoff");
     }
 
     if (!data.predictions[me.id]) {

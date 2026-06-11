@@ -4,6 +4,7 @@ const loadEnv = require("./env");
 const apiRouter = require("./api");
 const { HttpError } = require("./errors");
 const createRateLimit = require("./rateLimit");
+const { startLiveSync, stopLiveSync } = require("./liveSync");
 
 loadEnv();
 
@@ -65,9 +66,11 @@ if (require.main === module) {
   const server = app.listen(port, host, () => {
     console.log(`WorldCup API listening on http://${host}:${port}`);
   });
+  startLiveSync();
 
   function shutdown(signal) {
     console.log(`${signal} received, shutting down`);
+    stopLiveSync();
     server.close(() => {
       process.exit(0);
     });
