@@ -1,7 +1,9 @@
-<view class="page" wx:if="{{match}}">
+<view class="{{prediction ? 'page locked-page' : 'page'}}" wx:if="{{match}}">
   <view class="card match-panel">
-    <text class="tag">{{match.group}}</text>
-    <text class="time">{{match.time}}</text>
+    <view class="match-topline">
+      <text class="tag">{{match.group}}</text>
+      <text class="time">{{match.time}}</text>
+    </view>
     <view class="teams">
       <text>{{match.home}}</text>
       <text class="versus">VS</text>
@@ -10,8 +12,16 @@
     <text class="muted">提交后显示 AI 参考，防止大家抄作业。</text>
   </view>
 
+  <view class="submitted-card" wx:if="{{prediction}}">
+    <view>
+      <text class="submitted-label">已提交预测</text>
+      <text class="submitted-value">{{prediction.result}} {{prediction.score}}</text>
+    </view>
+    <text class="submitted-lock">不可更改</text>
+  </view>
+
   <view class="section-title">赛果选择</view>
-  <view class="segmented">
+  <view class="{{prediction ? 'segmented locked' : 'segmented'}}">
     <view class="{{form.result === item ? 'seg active' : 'seg'}}" wx:for="{{resultOptions}}" wx:key="*this" bindtap="selectResult" data-value="{{item}}">
       {{item}}
     </view>
@@ -19,13 +29,13 @@
 
   <view class="section-title">比分</view>
   <view class="score-row">
-    <input class="score-input" type="number" value="{{form.homeGoals}}" bindinput="setHomeGoals" maxlength="2" />
+    <input class="score-input" type="number" value="{{form.homeGoals}}" bindinput="setHomeGoals" maxlength="2" disabled="{{prediction ? true : false}}" />
     <text class="score-colon">:</text>
-    <input class="score-input" type="number" value="{{form.awayGoals}}" bindinput="setAwayGoals" maxlength="2" />
+    <input class="score-input" type="number" value="{{form.awayGoals}}" bindinput="setAwayGoals" maxlength="2" disabled="{{prediction ? true : false}}" />
   </view>
 
   <view class="section-title">总进球数</view>
-  <view class="segmented">
+  <view class="{{prediction ? 'segmented locked' : 'segmented'}}">
     <view class="{{form.totalGoals === item ? 'seg active' : 'seg'}}" wx:for="{{goalOptions}}" wx:key="*this" bindtap="selectGoals" data-value="{{item}}">
       {{item}}
     </view>
@@ -38,7 +48,7 @@
         <text class="lineup-title">首发阵容</text>
         <text class="lineup-status">{{lineupStatusText}}</text>
       </view>
-      <button class="lineup-refresh" bindtap="refreshLineups">同步</button>
+      <button class="lineup-refresh" bindtap="refreshLineups" disabled="{{prediction ? true : false}}">同步</button>
     </view>
 
     <view class="lineup-list" wx:if="{{lineupPlayers.length}}">
@@ -57,15 +67,15 @@
 
     <text class="lineup-empty" wx:else>暂未拿到首发名单，可以先手动填写。</text>
   </view>
-  <input class="text-input" placeholder="例如：希门尼斯" value="{{form.firstScorer}}" bindinput="setFirstScorer" />
+  <input class="text-input" placeholder="例如：希门尼斯" value="{{form.firstScorer}}" bindinput="setFirstScorer" disabled="{{prediction ? true : false}}" />
 
   <view class="section-title">信心值</view>
   <view class="confidence-card">
     <text>{{form.confidence}}%</text>
-    <slider min="1" max="100" step="1" value="{{form.confidence}}" activeColor="#0b7a75" backgroundColor="#d8dee5" bindchange="setConfidence" />
+    <slider min="1" max="100" step="1" value="{{form.confidence}}" activeColor="#0b7a75" backgroundColor="#d8dee5" bindchange="setConfidence" disabled="{{prediction ? true : false}}" />
   </view>
 
-  <button class="primary-btn submit" bindtap="submitPrediction">提交预测</button>
+  <button class="{{prediction ? 'primary-btn submit disabled' : 'primary-btn submit'}}" bindtap="submitPrediction">{{prediction ? '已提交预测' : '提交预测'}}</button>
   <button class="ghost-btn share" wx:if="{{prediction}}" open-type="share">发到群里交流</button>
 
   <view class="card fun-card" wx:if="{{funCard}}">
@@ -83,3 +93,4 @@
     <text class="muted">{{match.aiNote}}</text>
   </view>
 </view>
+<global-login-popup />

@@ -97,7 +97,15 @@ function userPredictions(data, userId) {
 
 function predictionMap(predictions) {
   return Object.keys(predictions).reduce((result, matchId) => {
-    result[matchId] = predictions[matchId].score;
+    const prediction = predictions[matchId] || {};
+    result[matchId] = {
+      result: prediction.result || "",
+      score: prediction.score || "",
+      totalGoals: prediction.totalGoals || "",
+      firstScorer: prediction.firstScorer || "",
+      confidence: prediction.confidence || 0,
+      submittedAt: prediction.submittedAt || ""
+    };
     return result;
   }, {});
 }
@@ -336,6 +344,9 @@ router.post("/predictions/submit", asyncRoute(async (req, res) => {
 
     if (!data.predictions[me.id]) {
       data.predictions[me.id] = {};
+    }
+    if (data.predictions[me.id][payload.matchId]) {
+      throw badRequest("Prediction already submitted");
     }
 
     const prediction = {

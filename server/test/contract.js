@@ -10,6 +10,12 @@ async function request(base, path, options = {}) {
   return body.data;
 }
 
+async function requestRaw(base, path, options = {}) {
+  const response = await fetch(`${base}${path}`, options);
+  const body = await response.json();
+  return { response, body };
+}
+
 async function main() {
   const server = app.listen(0, "127.0.0.1");
   await new Promise((resolve) => server.once("listening", resolve));
@@ -51,6 +57,24 @@ async function main() {
       })
     });
     assert(predictionResult.prediction && predictionResult.prediction.score, "prediction result is required");
+
+    const duplicatePrediction = await requestRaw(base, "/worldcup/predictions/submit", {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({
+        matchId: "m1",
+        result: detail.match.aiPick || "home",
+        score: "3:1",
+        totalGoals: "2-3",
+        firstScorer: "test",
+        firstScorerSource: "manual",
+        confidence: 80
+      })
+    });
+    assert.equal(duplicatePrediction.response.status, 400, "duplicate prediction should be rejected");
+
+    const predictedHome = await request(base, "/worldcup/home", { headers: authHeaders });
+    assert.equal(predictedHome.predictions.m1.score, "2:1", "home prediction summary should include score");
 
     const rooms = await request(base, "/worldcup/rooms", { headers: authHeaders });
     assert(Array.isArray(rooms.rooms), "rooms.rooms must be an array");

@@ -81,7 +81,7 @@ Page({
     if (this.data.loginLoading) return;
 
     this.setData({ loginLoading: true });
-    api.loginWithWechatProfile()
+    api.login({ userInfo: null })
       .then(() => {
         wx.showToast({ title: "登录成功", icon: "success" });
         this.refreshProfile();

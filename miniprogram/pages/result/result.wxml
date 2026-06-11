@@ -26,3 +26,4 @@
 
   <button class="primary-btn" open-type="share" wx:if="{{prediction}}">分享记录</button>
 </view>
+<global-login-popup />

@@ -106,6 +106,16 @@ function isMeaningfulName(name) {
     && name.trim() !== "未登录用户";
 }
 
+function generateRandomNickName() {
+  const prefixes = ["球迷", "战术家", "热血", "看台", "冠军", "预测员"];
+  const suffix = `${Math.floor(Math.random() * 900) + 100}`;
+  return `${prefixes[Math.floor(Math.random() * prefixes.length)]}${suffix}`;
+}
+
+function pickMeaningfulName(...candidates) {
+  return candidates.find((name) => isMeaningfulName(name)) || "";
+}
+
 async function createOrUpdateUser({ code, userInfo = {} }) {
   const safeUserInfo = userInfo && typeof userInfo === "object" && !Array.isArray(userInfo)
     ? userInfo
@@ -119,11 +129,16 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
   return updateStore((data) => {
     const normalizedData = normalizeStoreData(data);
     const existing = normalizedData.users?.[userId] || {};
-    const profileName = isMeaningfulName(safeUserInfo?.nickName)
-      ? safeUserInfo.nickName.trim()
-      : isMeaningfulName(safeUserInfo?.name)
-        ? safeUserInfo.name.trim()
-        : "";
+    const profileName = pickMeaningfulName(
+      safeUserInfo?.nickName,
+      safeUserInfo?.name
+    ).trim();
+    const fallbackName = pickMeaningfulName(
+      existing?.nickName,
+      existing?.name,
+      existing?.displayName
+    ) || generateRandomNickName();
+    const name = profileName || fallbackName;
     const avatarUrl = typeof safeUserInfo?.avatarUrl === "string" && safeUserInfo.avatarUrl.trim()
       ? safeUserInfo.avatarUrl.trim()
       : typeof safeUserInfo?.avatar === "string" && safeUserInfo.avatar.trim()
@@ -133,12 +148,11 @@ async function createOrUpdateUser({ code, userInfo = {} }) {
           : typeof existing?.avatar === "string" && existing.avatar.trim()
             ? existing.avatar.trim()
             : "";
-    const name = profileName || existing?.name || "我";
     const user = {
       id: userId,
       name,
-      nickName: profileName || existing?.nickName || name,
-      displayName: profileName || existing?.displayName || name,
+      nickName: profileName || fallbackName,
+      displayName: profileName || fallbackName,
       avatarUrl,
       avatar: avatarUrl,
       score: existing?.score || 0,

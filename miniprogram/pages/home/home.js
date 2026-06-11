@@ -69,6 +69,7 @@ Page({
           me: homeData.me,
           matches: homeData.matches.map((match) => ({
             ...match,
+            myPrediction: this.normalizePredictionSummary(predictions[match.id]),
             statusText: match.status === "closed" ? "已公布" : predictions[match.id] ? "已预测" : "去预测",
             aiSummary: predictions[match.id] || match.status === "closed"
               ? `AI：${match.aiPick} ${match.aiScore}`
@@ -89,6 +90,28 @@ Page({
         console.error("首页加载错误:", error);
         wx.showToast({ title: "线上数据不可用", icon: "none" });
       });
+  },
+
+  normalizePredictionSummary(prediction) {
+    if (!prediction) {
+      return null;
+    }
+    if (typeof prediction === "string") {
+      return {
+        result: "",
+        score: prediction,
+        text: `我的预测 ${prediction}`
+      };
+    }
+
+    const result = prediction.result || "";
+    const score = prediction.score || "";
+    return {
+      ...prediction,
+      result,
+      score,
+      text: result && score ? `我的预测 ${result} ${score}` : `我的预测 ${score || result}`
+    };
   },
 
   startCountdown(openingKickoffAt) {
@@ -182,7 +205,7 @@ Page({
     }
 
     wx.showToast({ title: "请先微信登录", icon: "none" });
-    return api.loginWithWechatProfile().then(() => {
+    return api.login({ userInfo: null }).then(() => {
       wx.showToast({ title: "登录成功", icon: "success" });
     });
   },

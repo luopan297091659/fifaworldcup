@@ -59,6 +59,10 @@
         <text class="muted">{{item.aiSummary}}</text>
         <text class="{{item.status === 'closed' ? 'status closed' : 'status'}}">{{item.statusText}}</text>
       </view>
+      <view class="prediction-record" wx:if="{{item.myPrediction}}">
+        <text class="prediction-label">已提交</text>
+        <text class="prediction-text">{{item.myPrediction.text}}</text>
+      </view>
     </view>
   </view>
   <view class="card empty-card" wx:else>
@@ -81,7 +85,7 @@
         <text class="group-card-desc" wx:if="{{item.shareText || item.description}}">{{item.shareText || item.description}}</text>
       </view>
 
-      <view class="group-action-row">
+      <view class="{{item.joined ? 'group-action-row joined' : 'group-action-row'}}">
         <button class="mini-action-btn" open-type="share" data-name="{{item.name}}" data-room-id="{{item.id}}">邀请加入</button>
         <button class="mini-action-btn" bindtap="joinPublicGroup" data-room-id="{{item.id}}" wx:if="{{!item.joined}}">立即加入</button>
       </view>
@@ -129,3 +133,4 @@
     <text class="rank-badge">去创建</text>
   </view>
 </view>
+<global-login-popup />

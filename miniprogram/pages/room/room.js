@@ -58,7 +58,7 @@ Page({
     }
 
     wx.showToast({ title: "请先微信登录", icon: "none" });
-    return api.loginWithWechatProfile().then(() => {
+    return api.login({ userInfo: null }).then(() => {
       wx.showToast({ title: "登录成功", icon: "success" });
     });
   },

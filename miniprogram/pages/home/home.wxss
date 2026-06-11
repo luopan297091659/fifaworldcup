@@ -190,6 +190,10 @@
   margin-top: 14rpx;
 }
 
+.group-action-row.joined {
+  grid-template-columns: 1fr;
+}
+
 .mini-action-btn {
   display: flex;
   align-items: center;
@@ -266,6 +270,34 @@
 
 .status.closed {
   color: #b64128;
+}
+
+.prediction-record {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 14rpx;
+  padding: 12rpx 14rpx;
+  border: 2rpx solid rgba(11, 122, 117, 0.18);
+  border-radius: 10rpx;
+  background: #f0faf8;
+}
+
+.prediction-label {
+  flex: 0 0 auto;
+  color: #0b7a75;
+  font-size: 22rpx;
+  font-weight: 900;
+}
+
+.prediction-text {
+  min-width: 0;
+  color: #17212b;
+  font-size: 24rpx;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room-preview {

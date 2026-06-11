@@ -130,18 +130,29 @@ Page({
   },
 
   refreshLineups() {
+    if (this.isPredictionLocked()) {
+      wx.showToast({ title: "预测已提交，不能修改", icon: "none" });
+      return;
+    }
     this.loadMatchDetail(this.data.matchId, { refreshLineup: true, toast: true });
   },
 
+  isPredictionLocked() {
+    return Boolean(this.data.prediction);
+  },
+
   selectResult(event) {
+    if (this.isPredictionLocked()) return;
     this.setData({ "form.result": event.currentTarget.dataset.value });
   },
 
   selectGoals(event) {
+    if (this.isPredictionLocked()) return;
     this.setData({ "form.totalGoals": event.currentTarget.dataset.value });
   },
 
   setHomeGoals(event) {
+    if (this.isPredictionLocked()) return;
     const value = String(event.detail.value).trim();
     if (!/^\d+$/.test(value) && value !== "") {
       wx.showToast({ title: "请输入整数", icon: "none" });
@@ -151,6 +162,7 @@ Page({
   },
 
   setAwayGoals(event) {
+    if (this.isPredictionLocked()) return;
     const value = String(event.detail.value).trim();
     if (!/^\d+$/.test(value) && value !== "") {
       wx.showToast({ title: "请输入整数", icon: "none" });
@@ -160,6 +172,7 @@ Page({
   },
 
   setFirstScorer(event) {
+    if (this.isPredictionLocked()) return;
     const value = event.detail.value.trim();
     if (value.length > 20) {
       wx.showToast({ title: "球员名字不超过 20 个字符", icon: "none" });
@@ -172,6 +185,7 @@ Page({
   },
 
   selectFirstScorer(event) {
+    if (this.isPredictionLocked()) return;
     const name = event.currentTarget.dataset.name;
     if (!name) return;
     this.setData({
@@ -181,6 +195,7 @@ Page({
   },
 
   setConfidence(event) {
+    if (this.isPredictionLocked()) return;
     const value = Number(event.detail.value);
     if (value < 0 || value > 100) {
       wx.showToast({ title: "信心值应在 0-100 之间", icon: "none" });
@@ -191,6 +206,10 @@ Page({
 
   submitPrediction() {
     const { match, form } = this.data;
+    if (this.isPredictionLocked()) {
+      wx.showToast({ title: "本场预测已提交，不能修改", icon: "none" });
+      return;
+    }
     if (!api.isLoggedIn()) {
       wx.showToast({ title: "请先微信登录", icon: "none" });
       return;
@@ -240,7 +259,8 @@ Page({
         wx.showToast({ title: "预测已提交", icon: "success" });
       })
       .catch((error) => {
-        wx.showToast({ title: "提交失败，请重试", icon: "none" });
+        const message = error && String(error.message || "");
+        wx.showToast({ title: message.includes("already") ? "本场预测已提交" : "提交失败，请重试", icon: "none" });
         console.error("预测提交错误:", error);
       });
   },

@@ -38,6 +38,9 @@
       }
     ]
   },
+  "usingComponents": {
+    "global-login-popup": "/components/global-login-popup/global-login-popup"
+  },
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }
