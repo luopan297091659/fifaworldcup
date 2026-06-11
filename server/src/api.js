@@ -6,6 +6,7 @@ const { createOrUpdateUser, getCurrentUser } = require("./auth");
 const { badRequest, notFound, unauthorized } = require("./errors");
 const { readStore, updateStore } = require("./store");
 const {
+  normalizeVisibilityFlag,
   validateAppKey,
   validateMatchId,
   validatePredictionPayload,
@@ -128,10 +129,10 @@ function buildMe(data, user) {
 }
 
 function roomIsPublic(room) {
-  if (typeof room.isPublic === "boolean") {
-    return room.isPublic;
+  if (typeof room.isPublic !== "undefined") {
+    return normalizeVisibilityFlag(room.isPublic);
   }
-  return room.type !== "私密";
+  return String(room.type || "").trim() !== "私密";
 }
 
 function roomsWithUser(data, me, options = {}) {

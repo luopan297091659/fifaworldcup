@@ -64,6 +64,149 @@ test('new rooms default to private visibility when isPublic is not provided', as
   }
 });
 
+test('public rooms should be visible to other users after creation', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-public-owner-${Date.now()}`);
+    const other = await login(base, `visibility-public-other-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `公开小组-${Date.now()}`,
+        topic: '所有人都能看到',
+        type: '公开',
+        isPublic: true
+      })
+    });
+
+    assert.equal(created.room.isPublic, true, 'created room should be public');
+
+    const publicRooms = await getRooms(base, other.token);
+    assert.equal(
+      publicRooms.rooms.some((room) => room.id === created.room.id),
+      true,
+      'public room should appear in other users\' room list'
+    );
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
+test('public visibility should also work when isPublic is provided as a truthy string', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-string-owner-${Date.now()}`);
+    const other = await login(base, `visibility-string-other-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `兼容公开-${Date.now()}`,
+        topic: '兼容旧客户端值',
+        type: '公开',
+        isPublic: 'true'
+      })
+    });
+
+    assert.equal(created.room.isPublic, true, 'string truthy visibility should still be treated as public');
+
+    const publicRooms = await getRooms(base, other.token);
+    assert.equal(
+      publicRooms.rooms.some((room) => room.id === created.room.id),
+      true,
+      'string visibility should still make the room visible to other users'
+    );
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
+test('public visibility should still work when type is omitted and isPublic is a truthy string', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-legacy-owner-${Date.now()}`);
+    const other = await login(base, `visibility-legacy-other-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `兼容旧客户端-${Date.now()}`,
+        topic: '无需传 type 也能公开',
+        isPublic: 'true'
+      })
+    });
+
+    assert.equal(created.room.isPublic, true, 'legacy truthy string should still create a public room');
+
+    const publicRooms = await getRooms(base, other.token);
+    assert.equal(
+      publicRooms.rooms.some((room) => room.id === created.room.id),
+      true,
+      'legacy truthy visibility should make the room visible to other users'
+    );
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
 test('private rooms stay hidden from non-members but remain shareable via invite link', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

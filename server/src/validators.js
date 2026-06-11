@@ -7,6 +7,28 @@ function asString(value, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
 }
 
+function normalizeVisibilityFlag(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((item) => normalizeVisibilityFlag(item));
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "on", "公开", "public", "open"].includes(normalized)) {
+      return true;
+    }
+    if (["false", "0", "no", "off", "私密", "private", "close", "closed"].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return Boolean(value);
+}
+
 function validateAppKey(req, res, next) {
   const expected = process.env.APP_KEY || "worldcup";
   const body = req.body || {};
@@ -47,12 +69,14 @@ function validateRoomName(value) {
 function validateRoomPayload(body = {}) {
   const name = validateRoomName(body.name);
   const topic = asString(body.topic || "一起预测世界杯赛果").slice(0, 60);
-  const explicitPublic = typeof body.isPublic === "boolean";
-  const isPublic = explicitPublic
-    ? Boolean(body.isPublic)
-    : asString(body.type || "").trim() === "公开";
+  const hasExplicitVisibility = Object.prototype.hasOwnProperty.call(body, "isPublic");
+  const explicitVisibility = hasExplicitVisibility ? normalizeVisibilityFlag(body.isPublic) : undefined;
+  const typeText = asString(body.type || "").trim();
+  const isPublic = typeof explicitVisibility === "boolean"
+    ? explicitVisibility
+    : typeText === "公开" || typeText === "public";
   const type = asString(
-    body.type || (isPublic ? "公开" : "私密"),
+    typeText || (isPublic ? "公开" : "私密"),
     isPublic ? "公开" : "私密"
   ).slice(0, 12);
 
@@ -108,5 +132,6 @@ module.exports = {
   validateRoomId,
   validateRoomName,
   validateRoomPayload,
-  validatePredictionPayload
+  validatePredictionPayload,
+  normalizeVisibilityFlag
 };
