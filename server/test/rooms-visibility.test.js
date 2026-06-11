@@ -207,6 +207,47 @@ test('public visibility should still work when type is omitted and isPublic is a
   }
 });
 
+test('public rooms should always be labeled as public even if the client sends a stale private type', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `visibility-label-owner-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `类型同步-${Date.now()}`,
+        topic: '即使客户端传错类型也要公开',
+        type: '私密',
+        isPublic: true
+      })
+    });
+
+    assert.equal(created.room.isPublic, true, 'room should remain public');
+    assert.equal(created.room.type, '公开', 'room type should be normalized to public when isPublic is true');
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
 test('private rooms stay hidden from non-members but remain shareable via invite link', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

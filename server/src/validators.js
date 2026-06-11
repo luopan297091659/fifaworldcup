@@ -74,11 +74,8 @@ function validateRoomPayload(body = {}) {
   const typeText = asString(body.type || "").trim();
   const isPublic = typeof explicitVisibility === "boolean"
     ? explicitVisibility
-    : typeText === "公开" || typeText === "public";
-  const type = asString(
-    typeText || (isPublic ? "公开" : "私密"),
-    isPublic ? "公开" : "私密"
-  ).slice(0, 12);
+    : normalizeVisibilityFlag(typeText) || typeText === "公开" || typeText === "public";
+  const type = (isPublic ? "公开" : "私密").slice(0, 12);
 
   return { name, topic, type, isPublic: Boolean(isPublic) };
 }
