@@ -54,13 +54,7 @@ Page({
           ? homeData.publicGroups
           : (Array.isArray(homeData.groups) ? homeData.groups : []))
           .map((group) => {
-            const joined = Boolean(
-              group.joined
-              || group.isJoined
-              || group.memberStatus === "joined"
-              || (Array.isArray(group.players) && group.players.some((player) => player.id === homeData.me.id))
-              || String(group.status || "").includes("已加入")
-            );
+            const joined = this.isGroupJoined(group, homeData.me && homeData.me.id);
 
             return {
               ...group,
@@ -150,6 +144,29 @@ Page({
 
   pad(value) {
     return String(value).padStart(2, "0");
+  },
+
+  isGroupJoined(group, userId) {
+    if (!group || !userId) {
+      return Boolean(group && group.joined);
+    }
+
+    const explicitJoined = Boolean(
+      group.joined
+      || group.isJoined
+      || group.memberStatus === "joined"
+      || group.memberStatus === "已加入"
+      || String(group.status || "").includes("已加入")
+      || String(group.accessMode || "").includes("已加入")
+    );
+
+    if (explicitJoined) {
+      return true;
+    }
+
+    return Array.isArray(group.players)
+      ? group.players.some((player) => player && (player.id === userId || player.userId === userId))
+      : false;
   },
 
   getMyRoomRank(room, userId) {

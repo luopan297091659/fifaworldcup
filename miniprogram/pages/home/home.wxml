@@ -84,8 +84,6 @@
       <view class="group-action-row">
         <button class="mini-action-btn" open-type="share" data-name="{{item.name}}" data-room-id="{{item.id}}">邀请加入</button>
         <button class="mini-action-btn" bindtap="joinPublicGroup" data-room-id="{{item.id}}" wx:if="{{!item.joined}}">立即加入</button>
-        <button class="mini-action-btn" bindtap="goRanking" data-room-id="{{item.id}}" data-room-name="{{item.name}}">积分排名</button>
-        <button class="mini-action-btn" bindtap="goLive" data-room-id="{{item.id}}" data-name="{{item.name}}">预测实况</button>
       </view>
     </view>
   </view>
