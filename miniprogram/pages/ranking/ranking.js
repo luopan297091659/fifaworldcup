@@ -2,6 +2,8 @@ const api = require("../../utils/api");
 
 Page({
   data: {
+    roomId: "",
+    roomName: "",
     activeTab: "friends",
     tabs: [
       { key: "friends", label: "好友" },
@@ -9,6 +11,13 @@ Page({
     ],
     me: {},
     players: []
+  },
+
+  onLoad(options = {}) {
+    this.setData({
+      roomId: options.roomId || "",
+      roomName: options.roomName || ""
+    });
   },
 
   onShow() {
@@ -20,7 +29,7 @@ Page({
   },
 
   refreshRanking() {
-    api.getRanking(this.data.activeTab)
+    api.getRanking(this.data.activeTab, this.data.roomId)
       .then(({ me, players }) => {
         if (!players || !players.length) {
           this.setData({ me: me || {}, players: [] });

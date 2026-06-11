@@ -299,6 +299,60 @@ test('home feed should expose public rooms as public group dynamics', async () =
   }
 });
 
+test('room-specific rankings should only use the current group members', async () => {
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const owner = await login(base, `ranking-room-owner-${Date.now()}`);
+    const other = await login(base, `ranking-room-other-${Date.now()}`);
+
+    const created = await request(base, '/worldcup/rooms/create', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({
+        name: `群内榜单-${Date.now()}`,
+        topic: '只看当前群成员积分',
+        type: '公开',
+        isPublic: true
+      })
+    });
+
+    const ranking = await request(base, `/worldcup/rankings?scope=friends&roomId=${created.room.id}`, {
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${other.token}`
+      }
+    });
+
+    assert.equal(Array.isArray(ranking.players), true, 'ranking result should contain players');
+    assert.equal(
+      ranking.players.every((player) => player.id === owner.id || player.id === created.room.ownerId || player.id === created.room.players?.[0]?.id),
+      true,
+      'room ranking should only contain members from the selected group'
+    );
+
+    await request(base, '/worldcup/rooms/delete', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-app-key': 'worldcup',
+        authorization: `Bearer ${owner.token}`
+      },
+      body: JSON.stringify({ roomId: created.room.id })
+    });
+  } finally {
+    server.close();
+  }
+});
+
 test('private rooms stay hidden from non-members but remain shareable via invite link', async () => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));

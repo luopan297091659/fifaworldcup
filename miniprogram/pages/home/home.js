@@ -50,9 +50,26 @@ Page({
           ? homeData.latestMatches
           : (Array.isArray(homeData.matches) ? homeData.matches.slice(0, 3) : []);
 
-        const publicGroups = Array.isArray(homeData.publicGroups)
+        const publicGroups = (Array.isArray(homeData.publicGroups)
           ? homeData.publicGroups
-          : (Array.isArray(homeData.groups) ? homeData.groups : []);
+          : (Array.isArray(homeData.groups) ? homeData.groups : []))
+          .map((group) => {
+            const joined = Boolean(
+              group.joined
+              || group.isJoined
+              || group.memberStatus === "joined"
+              || (Array.isArray(group.players) && group.players.some((player) => player.id === homeData.me.id))
+              || String(group.status || "").includes("已加入")
+            );
+
+            return {
+              ...group,
+              joined,
+              memberCount: Number(group.memberCount || group.members || 0),
+              heat: Number(group.heat || 0),
+              accessMode: group.accessMode || (group.isPublic ? "公开群" : "私密群")
+            };
+          });
 
         this.setData({
           me: homeData.me,
@@ -199,8 +216,15 @@ Page({
       });
   },
 
-  goRanking() {
-    wx.navigateTo({ url: "/pages/ranking/ranking" });
+  goRanking(event) {
+    const roomId = event.currentTarget.dataset.roomId || "";
+    const roomName = event.currentTarget.dataset.roomName || "";
+
+    wx.navigateTo({
+      url: roomId
+        ? `/pages/ranking/ranking?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
+        : "/pages/ranking/ranking"
+    });
   },
 
   goLive(event) {

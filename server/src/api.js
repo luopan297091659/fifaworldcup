@@ -554,11 +554,42 @@ router.post("/rooms/cheer", asyncRoute(async (req, res) => {
 router.get("/rankings", asyncRoute(async (req, res) => {
   const data = await readStore();
   const me = buildMe(data, await userFor(req));
-  const players = Object.values(data.users || {})
-    .map((user) => buildMe(data, user))
-    .sort((a, b) => b.score - a.score);
+  const roomId = typeof req.query.roomId === "string" ? req.query.roomId.trim() : "";
+  const room = roomId
+    ? (data.rooms || []).find((item) => item.id === roomId)
+    : null;
 
-  res.json(ok({ me, scope: req.query.scope || "friends", players }));
+  const players = (roomId && room)
+    ? getRoomPlayers(room, data)
+        .filter((player) => player.id !== "guest")
+        .map((player) => {
+          const user = data.users[player.id] || {};
+          return buildMe(data, {
+            ...user,
+            id: player.id,
+            name: player.name || user.name || user.displayName || "",
+            displayName: player.name || user.displayName || user.name || "",
+            avatarUrl: player.avatarUrl || user.avatarUrl || user.avatar || "",
+            avatar: player.avatarUrl || user.avatarUrl || user.avatar || "",
+            score: Number(player.score || user.score || 0),
+            predictions: Number(user.predictions || 0),
+            aiWins: Number(user.aiWins || 0),
+            percentile: Number(user.percentile || 0),
+            badges: Array.isArray(user.badges) ? user.badges : []
+          });
+        })
+        .sort((a, b) => b.score - a.score)
+    : Object.values(data.users || {})
+        .map((user) => buildMe(data, user))
+        .sort((a, b) => b.score - a.score);
+
+  res.json(ok({
+    me,
+    scope: req.query.scope || "friends",
+    roomId: room ? room.id : "",
+    roomName: room ? room.name : "",
+    players
+  }));
 }));
 
 router.get("/profile", asyncRoute(async (req, res) => {

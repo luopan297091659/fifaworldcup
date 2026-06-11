@@ -405,8 +405,8 @@ function cheerRoom(roomId) {
   return request("cheerRoom", { roomId });
 }
 
-function getRanking(scope) {
-  return request("ranking", { scope }, "GET");
+function getRanking(scope, roomId) {
+  return request("ranking", { scope, roomId }, "GET");
 }
 
 function getProfile() {

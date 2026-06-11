@@ -6,8 +6,8 @@
   </view>
 
   <view class="card rank-summary">
-    <text class="summary-value">你已超过 {{me.percentile}}% 的玩家</text>
-    <text class="muted">继续预测下一场，排名会实时变化。</text>
+    <text class="summary-value">{{roomName ? roomName + ' · 当前群成员积分排名' : '你已超过 ' + me.percentile + '% 的玩家'}}</text>
+    <text class="muted">{{roomName ? '只展示当前小组成员的积分榜，方便查看群内战况。' : '继续预测下一场，排名会实时变化。'}}</text>
   </view>
 
   <view class="card leaderboard">
