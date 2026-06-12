@@ -2,7 +2,7 @@
   <view class="login-dialog">
     <view class="brand-mark">球</view>
     <text class="login-title">微信一键登录</text>
-    <text class="login-desc">登录后可保存预测记录、加入好友小组，并自动生成你的球迷昵称。</text>
+    <text class="login-desc">登录后可保存预测记录，并自动生成你的球迷昵称。</text>
     <button class="login-button" loading="{{loading}}" bindtap="handleLogin">
       {{loading ? "登录中" : "微信一键登录"}}
     </button>

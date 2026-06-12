@@ -5,11 +5,8 @@ Page({
     me: {},
     matches: [],
     members: [],
-    groups: [],
     latestMatches: [],
     latestResult: null,
-    topRoom: null,
-    myRoomRank: 0,
     opening: {},
     heroImageUrl: ""
   },
@@ -27,31 +24,12 @@ Page({
         }
 
         const predictions = homeData.predictions || {};
-        const topRoom = homeData.topRoom || null;
-        const myRoomRank = typeof homeData.myRoomRank === "number"
-          ? homeData.myRoomRank
-          : this.getMyRoomRank(topRoom, homeData.me.id);
 
         const latestMatches = Array.isArray(homeData.latestMatches) && homeData.latestMatches.length
           ? homeData.latestMatches
           : (Array.isArray(homeData.matches) ? homeData.matches.slice(0, 3) : []);
         const decoratedLatestMatches = latestMatches.map((match) => this.decorateLatestMatch(match));
         const latestResult = this.pickLatestResult(decoratedLatestMatches);
-
-        const publicGroups = (Array.isArray(homeData.publicGroups)
-          ? homeData.publicGroups
-          : (Array.isArray(homeData.groups) ? homeData.groups : []))
-          .map((group) => {
-            const joined = this.isGroupJoined(group, homeData.me && homeData.me.id);
-
-            return {
-              ...group,
-              joined,
-              memberCount: Number(group.memberCount || group.members || 0),
-              heat: Number(group.heat || 0),
-              accessMode: group.accessMode || (group.isPublic ? "公开群" : "私密群")
-            };
-          });
 
         this.setData({
           me: homeData.me,
@@ -64,11 +42,8 @@ Page({
               : "提交后显示 AI 参考"
           })),
           members: Array.isArray(homeData.members) ? homeData.members : [],
-          groups: publicGroups,
           latestMatches: decoratedLatestMatches,
           latestResult,
-          topRoom,
-          myRoomRank,
           opening: homeData.opening || {},
           heroImageUrl: (homeData.opening && homeData.opening.heroImageUrl) || ""
         });
@@ -139,36 +114,6 @@ Page({
     };
   },
 
-  isGroupJoined(group, userId) {
-    if (!group || !userId) {
-      return Boolean(group && group.joined);
-    }
-
-    const explicitJoined = Boolean(
-      group.joined
-      || group.isJoined
-      || group.memberStatus === "joined"
-      || group.memberStatus === "已加入"
-      || String(group.status || "").includes("已加入")
-      || String(group.accessMode || "").includes("已加入")
-    );
-
-    if (explicitJoined) {
-      return true;
-    }
-
-    return Array.isArray(group.players)
-      ? group.players.some((player) => player && (player.id === userId || player.userId === userId))
-      : false;
-  },
-
-  getMyRoomRank(room, userId) {
-    const rankIndex = room && room.players
-      ? room.players.findIndex((player) => player.id === userId)
-      : -1;
-    return rankIndex >= 0 ? rankIndex + 1 : 0;
-  },
-
   requireLogin() {
     if (api.isLoggedIn()) {
       return Promise.resolve();
@@ -207,25 +152,6 @@ Page({
       });
   },
 
-  joinPublicGroup(event) {
-    const roomId = event.currentTarget.dataset.roomId || "";
-    if (!roomId) {
-      wx.showToast({ title: "群组信息缺失", icon: "none" });
-      return;
-    }
-
-    this.requireLogin()
-      .then(() => api.joinRoom(roomId))
-      .then(() => {
-        wx.showToast({ title: "已加入该群", icon: "success" });
-        this.loadHome();
-      })
-      .catch((error) => {
-        console.error("加入公开群失败:", error);
-        wx.showToast({ title: "加入失败", icon: "none" });
-      });
-  },
-
   goRanking(event) {
     const roomId = event.currentTarget.dataset.roomId || "";
     const roomName = event.currentTarget.dataset.roomName || "";
@@ -234,20 +160,6 @@ Page({
       url: roomId
         ? `/pages/ranking/ranking?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
         : "/pages/ranking/ranking"
-    });
-  },
-
-  goLive(event) {
-    const roomId = event.currentTarget.dataset.roomId || "";
-    const roomName = event.currentTarget.dataset.name || "群内预测实况";
-
-    if (!roomId) {
-      wx.showToast({ title: "群组信息缺失", icon: "none" });
-      return;
-    }
-
-    wx.navigateTo({
-      url: `/pages/chat/chat?roomId=${roomId}&roomName=${encodeURIComponent(roomName)}`
     });
   },
 

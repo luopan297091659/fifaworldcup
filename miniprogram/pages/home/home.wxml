@@ -63,32 +63,6 @@
     <text>暂无线上比赛数据</text>
   </view>
 
-  <view class="section-title">公开群动态</view>
-  <view class="match-list" wx:if="{{groups.length}}">
-    <view class="card match-card group-card" wx:for="{{groups}}" wx:key="id">
-      <view class="group-card-top">
-        <view class="group-card-header">
-          <text class="tag">{{item.status || '活跃'}}</text>
-          <text class="group-card-title">{{item.name}}</text>
-        </view>
-        <text class="muted">热度 {{item.heat || 0}}</text>
-      </view>
-
-      <view class="group-card-body">
-        <text class="muted">{{item.memberCount || 0}} 人在线 · {{item.accessMode || '公开群'}}</text>
-        <text class="group-card-desc" wx:if="{{item.shareText || item.description}}">{{item.shareText || item.description}}</text>
-      </view>
-
-      <view class="{{item.joined ? 'group-action-row joined' : 'group-action-row'}}">
-        <button class="mini-action-btn" open-type="share" data-name="{{item.name}}" data-room-id="{{item.id}}">邀请加入</button>
-        <button class="mini-action-btn" bindtap="joinPublicGroup" data-room-id="{{item.id}}" wx:if="{{!item.joined}}">立即加入</button>
-      </view>
-    </view>
-  </view>
-  <view class="card empty-card" wx:else>
-    <text>暂无群组信息</text>
-  </view>
-
   <view class="section-title">最新比赛</view>
   <view class="match-list" wx:if="{{latestMatches.length}}">
     <view class="card match-card" wx:for="{{latestMatches}}" wx:key="id">
@@ -111,20 +85,5 @@
     <text>暂无最新比赛信息</text>
   </view>
 
-  <view class="section-title">好友小组</view>
-  <view class="card room-preview" wx:if="{{topRoom}}" bindtap="goRoom">
-    <view>
-      <text class="room-name">{{topRoom.name}}</text>
-      <text class="muted">{{topRoom.members}} 人正在预测</text>
-    </view>
-    <text class="rank-badge">第 {{myRoomRank}} 名</text>
-  </view>
-  <view class="card room-preview empty-room" wx:else bindtap="goRoom">
-    <view>
-      <text class="room-name">还没有小组</text>
-      <text class="muted">创建线上小组后会在这里展示</text>
-    </view>
-    <text class="rank-badge">去创建</text>
-  </view>
 </view>
 <global-login-popup />
