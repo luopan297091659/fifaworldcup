@@ -1,5 +1,11 @@
 const assert = require("node:assert/strict");
-const { filterWorldCupFixtures, getSyncBudgetConfig, selectSyncMode, shouldFetchLiveData } = require("../src/liveSync");
+const {
+  filterWorldCupFixtures,
+  getSyncBudgetConfig,
+  normalizeStatus,
+  selectSyncMode,
+  shouldFetchLiveData
+} = require("../src/liveSync");
 
 async function main() {
   const config = getSyncBudgetConfig();
@@ -47,6 +53,10 @@ async function main() {
 
   assert.equal(filtered.length, 1, "non-World Cup fixtures should be ignored");
   assert.equal(filtered[0].fixture.id, 1, "only the 2026 World Cup fixture should remain");
+
+  assert.equal(normalizeStatus("FT", "2:0"), "closed", "FT should be treated as finished");
+  assert.equal(normalizeStatus("Match Finished", "2:0"), "closed", "finished long-label should also be treated as closed");
+  assert.equal(normalizeStatus("1H", ""), "live", "in-play status should remain live");
 
   console.log("live-sync budget test ok");
 }

@@ -54,8 +54,28 @@ Page({
       });
   },
 
+  isFinishedMatch(match) {
+    const text = [
+      match && match.status,
+      match && match.minute,
+      match && match.report,
+      match && match.latestReport,
+      match && match.finalScore,
+      match && match.liveScore
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return Boolean(
+      match && (
+        match.status === "closed"
+        || match.finalScore
+        || match.liveScore
+        || /(ft|aet|pen|full_time|match finished|match ended|已完|已结束|完赛|完场)/.test(text)
+      )
+    );
+  },
+
   getPredictionStatusText(match, prediction) {
-    if (match.status === "closed") {
+    if (this.isFinishedMatch(match) || match.status === "closed") {
       return "已公布";
     }
     if (prediction) {
@@ -69,7 +89,8 @@ Page({
 
   decorateLatestMatch(match) {
     const score = match.finalScore || match.liveScore || "";
-    const statusText = match.status === "closed"
+    const isFinished = this.isFinishedMatch(match);
+    const statusText = isFinished
       ? "已完赛"
       : match.status === "live"
         ? (match.minute ? `进行中 ${match.minute}` : "进行中")
@@ -79,7 +100,9 @@ Page({
       ...match,
       displayScore: score || "VS",
       statusText,
-      reportText: match.report || match.latestReport || (score ? "比分已同步" : "等待战报同步")
+      reportText: isFinished
+        ? (match.report || match.latestReport || (score ? "比分已同步" : "等待战报同步"))
+        : (match.report || match.latestReport || (score ? "比分已同步" : "等待战报同步"))
     };
   },
 
@@ -87,7 +110,8 @@ Page({
     if (!Array.isArray(latestMatches) || !latestMatches.length) {
       return null;
     }
-    return latestMatches.find((match) => match.status === "live")
+    return latestMatches.find((match) => this.isFinishedMatch(match) || match.status === "closed")
+      || latestMatches.find((match) => match.status === "live")
       || latestMatches.find((match) => match.finalScore || match.liveScore)
       || latestMatches[0];
   },

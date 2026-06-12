@@ -53,8 +53,14 @@ Component({
 
     syncVisible() {
       this.setData({
-        visible: !api.isLoggedIn()
+        visible: false
       });
+    },
+
+    show() {
+      if (!api.isLoggedIn()) {
+        this.setData({ visible: true });
+      }
     },
 
     handleLogin() {

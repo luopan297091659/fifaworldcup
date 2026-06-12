@@ -151,11 +151,35 @@ function shouldFetchLiveData(matches = [], budgetStatus = {}) {
   return upcomingMatches.length > 0 && (!budgetStatus.lastSuccessfulFetchAt || Date.now() - Number(budgetStatus.lastSuccessfulFetchAt) >= 30 * 60 * 1000);
 }
 
-function normalizeStatus(status, finalScore) {
+function isFinishedStatusValue(value) {
+  const text = String(value || "").toLowerCase();
+  return [
+    "closed", "finished", "ended", "full_time", "fulltime", "full-time",
+    "ft", "aet", "pen", "penalties", "match finished", "match ended"
+  ].some((token) => text === token || text.includes(token))
+    || /(full\s*time|match\s+finished|match\s+ended|finished|ended|完场|已完|已结束|完赛)/.test(text);
+}
+
+function isLiveStatusValue(value) {
+  const text = String(value || "").toLowerCase();
+  return [
+    "live", "playing", "in_progress", "running", "half_time", "ht", "1h", "2h", "et", "bt"
+  ].some((token) => text === token || text.includes(token))
+    || /(live|in\s+play|in_progress|half\s*time|halftime|extra\s*time|first\s+half|second\s+half)/.test(text);
+}
+
+function normalizeStatus(status, finalScore, minute = "") {
   const value = String(status || "").toLowerCase();
-  if (["closed", "finished", "ended", "full_time", "ft"].includes(value)) return "closed";
-  if (["live", "playing", "in_progress", "running", "half_time", "ht"].includes(value)) return "live";
-  if (finalScore) return "closed";
+  const minuteValue = String(minute || "").toLowerCase();
+
+  if (finalScore || isFinishedStatusValue(value) || isFinishedStatusValue(minuteValue)) {
+    return "closed";
+  }
+
+  if (isLiveStatusValue(value) || isLiveStatusValue(minuteValue)) {
+    return "live";
+  }
+
   return status || "open";
 }
 
@@ -168,7 +192,7 @@ function normalizeReportItem(item = {}) {
 
   return {
     matchId,
-    status: normalizeStatus(item.status || item.matchStatus, finalScore),
+    status: normalizeStatus(item.status || item.matchStatus, finalScore, item.minute || item.matchMinute),
     finalScore,
     liveScore,
     minute: item.minute || item.matchMinute || "",
@@ -243,25 +267,24 @@ function normalizeApiFootballFixture(fixture, dataMatches) {
   const match = mapFixtureToMatch(fixture, dataMatches);
   if (!match) return null;
 
-  const status = String(fixture?.fixture?.status?.short || "").toUpperCase();
-  const statusLabel = /FT|AET|PEN|CANC|WO|ABD|INT/.test(status)
-    ? "closed"
-    : /1H|2H|HT|ET|BT|LIVE|P/.test(status)
-      ? "live"
-      : (fixture?.fixture?.status?.long || match.status || "open");
-
+  const minute = fixture?.fixture?.status?.elapsed || match.minute || "";
   const homeGoals = fixture?.goals?.home ?? fixture?.score?.fulltime?.home ?? null;
   const awayGoals = fixture?.goals?.away ?? fixture?.score?.fulltime?.away ?? null;
   const finalScore = homeGoals !== null && awayGoals !== null ? `${homeGoals}:${awayGoals}` : match.finalScore || "";
   const liveScore = fixture?.score?.fulltime ? `${fixture.score.fulltime.home}:${fixture.score.fulltime.away}` : finalScore;
-  const minute = fixture?.fixture?.status?.elapsed || match.minute || "";
+  const longStatus = fixture?.fixture?.status?.long || match.status || "open";
+  const shortStatus = fixture?.fixture?.status?.short || "";
+  const normalizedStatus = normalizeStatus(shortStatus || longStatus, finalScore, minute);
+  const status = ["live", "closed"].includes(normalizedStatus)
+    ? normalizedStatus
+    : (longStatus || match.status || "open");
   const report = fixture?.fixture?.status?.long
     ? `${match.home} ${finalScore || "VS"} ${match.away}，${fixture.fixture.status.long}`
     : match.latestReport || "";
 
   return {
     matchId: match.id,
-    status: statusLabel === "LIVE" || statusLabel === "IN_PLAY" ? "live" : (statusLabel === "FINISHED" ? "closed" : statusLabel),
+    status,
     finalScore,
     liveScore,
     minute,
@@ -414,6 +437,7 @@ module.exports = {
   getBudgetStatus,
   getSyncBudgetConfig,
   normalizeReportPayload,
+  normalizeStatus,
   selectSyncMode,
   shouldFetchLiveData,
   startLiveSync,

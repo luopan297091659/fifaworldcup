@@ -159,15 +159,31 @@ function canSubmitPrediction(match, now = new Date()) {
   return Boolean(match && match.status !== "closed" && !hasKickedOff(match, now) && isTomorrowMatch(match, now));
 }
 
+function hasFinishedLabel(value) {
+  return /(ft|aet|pen|penalties|full\s*time|match\s+finished|match\s+ended|finished|ended|完场|已完|已结束|完赛)/i.test(String(value || ""));
+}
+
+function isFinishedMatch(match) {
+  return Boolean(
+    match
+    && (match.status === "closed"
+      || hasFinishedLabel(match.status)
+      || hasFinishedLabel(match.minute)
+      || hasFinishedLabel(match.report)
+      || hasFinishedLabel(match.latestReport)
+      || (match.finalScore || match.liveScore))
+  );
+}
+
 function decorateLiveState(match, now = new Date()) {
   if (!match) return match;
-  if (match.finalScore) {
+  if (isFinishedMatch(match) || match.finalScore) {
     return { ...match, status: "closed" };
   }
   if (match.liveScore || hasKickedOff(match, now)) {
     return {
       ...match,
-      status: match.status === "closed" ? "closed" : "live",
+      status: isFinishedMatch(match) ? "closed" : (match.status === "closed" ? "closed" : "live"),
       liveScore: match.liveScore || "",
       latestReport: match.latestReport || "比赛已开赛，等待服务端同步最新比分。"
     };
@@ -235,7 +251,7 @@ function buildPublicGroupFeed(data, rooms) {
       memberCount: Number(room.members || room.memberCount || 0),
       heat: Number(room.heat || 0),
       status: room.joined ? "已加入" : (room.status || "活跃"),
-      accessMode: room.type || "公开群 · 查看所有人预测数据",
+      accessMode: normalizeRoomVisibility(room).type || "公开群 · 查看所有人预测数据",
       shareText: room.shareText || "公开群已同步到服务端，所有登录用户都可查看群内预测数据、热度与战报。",
       feedMessages: Array.isArray(room.feedMessages) ? room.feedMessages.slice() : [],
       isPublic: true,
@@ -270,6 +286,18 @@ function roomIsPublic(room) {
   return String(room.type || "").trim() !== "私密";
 }
 
+function normalizeRoomVisibility(room = {}) {
+  const isPublic = roomIsPublic(room);
+  const normalizedType = String(room.type || "").trim();
+  return {
+    ...room,
+    isPublic,
+    type: normalizedType === "公开" || normalizedType === "public" || isPublic
+      ? "公开"
+      : "私密"
+  };
+}
+
 function roomsWithUser(data, me, options = {}) {
   const requestedRoomId = options.requestedRoomId || "";
 
@@ -283,12 +311,13 @@ function roomsWithUser(data, me, options = {}) {
       return joined || Boolean(requestedRoomId && room.id === requestedRoomId);
     })
     .map((room) => {
-      const players = getRoomPlayers(room, data).filter((player) => player.id !== "guest");
+      const normalizedRoom = normalizeRoomVisibility(room);
+      const players = getRoomPlayers(normalizedRoom, data).filter((player) => player.id !== "guest");
       const joined = players.some((player) => player.id === me.id);
       return {
-        ...room,
-        isPublic: roomIsPublic(room),
-        members: Math.max(room.members || 0, players.length),
+        ...normalizedRoom,
+        isPublic: normalizedRoom.isPublic,
+        members: Math.max(normalizedRoom.members || 0, players.length),
         ownerId: room.ownerId || "",
         joined,
         canManage: Boolean(room.ownerId && room.ownerId === me.id),
@@ -551,8 +580,11 @@ router.post("/rooms/update", asyncRoute(async (req, res) => {
     }
     room.name = payload.name;
     room.topic = payload.topic;
-    room.type = payload.type;
-    room.isPublic = typeof payload.isPublic === "boolean" ? payload.isPublic : room.isPublic !== false;
+    const nextVisibility = typeof payload.isPublic === "boolean"
+      ? payload.isPublic
+      : roomIsPublic(room);
+    room.isPublic = nextVisibility;
+    room.type = payload.type || (nextVisibility ? "公开" : "私密");
     room.updatedAt = new Date().toISOString();
     return { room, rooms: roomsWithUser(data, me) };
   });
